@@ -1,0 +1,36 @@
+\documentclass[10pt,onecolumn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{hmargin=3cm,vmargin=3cm}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true}
+
+\renewcommand{\labelitemi}{$\bullet$}
+
+
+\title{Essay on Ph.D. Proposal \\ \emph{Dynamic monitoring to find and diagnose software bugs in cloud applications}}
+\author{Alexandre Honorat}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+%\tableofcontents
+%\newpage
+
+%\onecolumn
+%\twocolumn
+\input{text.tex}
+\addcontentsline{toc}{section}{Bibliographie}
+\nocite{*} %% à commenter
+\bibliographystyle{plain}
+\bibliography{main}
+
+
+\end{document}
