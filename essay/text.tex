@@ -1,10 +1,10 @@
 \section{Introduction}
 
-Large -- often distributed -- applications in cloud systems provide services which must never stop. But correctness of such big applications cannot be ensured only at compile time, so it is important to have tools providing runtime analysis of these applications. These tools can collect data in order to correlate failures with some parts of the application code and then warn the the developpers. Better is to use these informations to predict future failures. Even better is to dynamically handle failures, fix the bug, and continue the execution without restart the application. The goal of this thesis is to implement such tool, and study at which point failures can be handled and corrected at runtime.
+Large distributed applications in cloud systems provide services which often must never stop, such as DBMS. But correctness of such big applications cannot be ensured only at compile time, they may fail at runtime so it is important to have tools providing runtime monitoring of these applications. These tools may collect data in order to correlate failures with some parts of the application code and then warn the developpers. A better idea is to use these monitoring informations to predict future failures. And even better is to dynamically handle failures, fix the bug, and continue the execution without restart the application. The goal of this thesis is to implement such tool, and study at which point failures can be handled and corrected at runtime.
 
 Indeed to analyse statically large applications can be a very difficult task -- for example interprocedural analysis is a hard problem, with current reserachs on it \cite{Art21} -- and so detect failures at runtime can improve the deployment time of such application. Moreover the failures can be caused by the environment thus a static analysis may be not sufficient and must be coupled to monitoring of the application and its environment during execution time. This may be done thanks to binary instrumentation techniques to collect runtime informations of the application (and its environment) and data mining techniques to analyse efficiently these informations. Extra to the data mining techniques, machine learning can be used to predict further failures. 
 
-\cite{Art4, Art7} ?
+Unfortunately, some state-of-the-art \cite{Art4, Art7}, do not even mention this problem. In fact monitoring is widely used to enable efficient load balancing, but not yet to automatically repair runtime failures. However this is a very important problem since solutions may improve the quality of service (failures do not more cause the application stop), and the development process (developp and maintain such large applications is very difficult).
 
 \section{Instrumention}
 
@@ -18,8 +18,6 @@ For component: \cite{Art20}
 
 \section{Data analysis}
 
-
-Correlate code and bug: \cite{Art6} ?\\
 Training for failure detection is always necessary since the systems (especially large distributed applications) can evolve with time, so do the possible failures \cite{Art1}.\\
 Prediction: \cite{Art11}.\\
 Analisys: \cite{Art12, Art14}.
@@ -29,9 +27,10 @@ Analisys: \cite{Art12, Art14}.
 Error detection: \cite{Art17}\\
 Need to classify \emph{defect classes}: \cite{Art8}.\\
 Static analysis to improve loop performances (by injecting break conditions): \cite{Art9}\\
+Find correction in existing code: \cite{Art6}.\\
 If statement correction: \cite{Art13}.\\
 Thesis...: \cite{Art18}
 
 \section{Some ideas}
 
-Several solutions exit to fix each bug, but evaluate each solution is costly. We can propose an evolutionnary approach to select the best solution, as for reducing energy in the article \cite{Art19}. For example, some large applications are actually processes distributed on many computers. When one process (an instance of the application) fails on a computer, the system find several possible fixes and evaluate them on different processes in the same time (on different computer, even those without failures). The evaluation can be made accordingly to several goals: no more failures, no speed decrease, no resources consumption increase, \ldots
+Several solutions exist to fix each bug, but evaluate each solution is costly. We can propose an evolutionnary approach to select the best solution, as for reducing energy in the article \cite{Art19}. For example, some large applications are actually processes distributed on many computers. When one process (an instance of the application) fails on one computer, the system find several possible fixes and evaluate them on different processes in the same time (on different computers, even those without failures). The evaluation can be made accordingly to several goals: no more failures, no speed decrease, no resources consumption increase, \ldots Then the best solution is the process having the best evaluation. Then this best fix is spread to all other processes, in order to prevent new failures.
