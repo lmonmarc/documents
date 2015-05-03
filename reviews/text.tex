@@ -4,7 +4,11 @@ Nowadays complex applications (with several components) often cohabits in the sa
 
 \section{Proposition}
 
+The \textsf{Spacegoat} framework reduces the overhead since it does not imply the instrumentation of all components at runtime, which is very costly. Actually the monitoring system starts with \emph{global monitoring}, detecting a fault with only informations from the JVM (memroy, CPU and I/O usage). In order to know which component is faulty in the JVM, the framework sorts all the components by risk of causing the problem. The component with the largest risk is instrumented first (accordingly to the problem i. e. if the problem is an important memory usage, only memory instructions will be monitored) for a couple of ms (cf Listing 2 in the original paper). If the instrumentation shows that this component does not respect its contract specified to the framework, it is declared faulty, and the \emph{localized} instrumentation stops here. Otherwise, the component having the second largest risk is instrumented, and so on. 
 
+To sort the possibly faulty components, the framework use customizable heuristics. The simplier heuristic is to high rank the most recently added component, and the components that interact with them. Besides the contract can defines limit of memory, CPU, I/O usage and number of messages exchanged for example.
+
+Thus \textsf{Spacegoat} reduces overhead by accurate instrumentation only where and when it is needed. Secondly \textsf{Spacegoat} determines if a component is faulty thanks to a contract. 
 
 \section{Implementation}
 
