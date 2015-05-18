@@ -12,6 +12,10 @@ Thus \textsf{Spacegoat} reduces overhead by accurate instrumentation only where 
 
 \section{Implementation}
 
+The \textsf{Spacegoat} framework is built from \textsf{Kevoree}. It provides an API usefull for monitoring some global properties (for example CPU usage or last recently added component) and can contain applications on several different execution platform. Moreover it enables the \emph{Model@run.time} paradigm since the application model (i. e. the way services are provided) can change dynamically thanks to reflection. 
 
+The selection of the monitoring type (global, full, localized, adaptative) is working thanks to this \emph{Model@runtime} approach: a component implementation (specific to  its monitoring state: if it is monitored or not, and what properties are monitored) is choosen at runtime regarding to the global properties and some algorithms in specific components. Three types of component have been implemented: the monitoring component that checks components' contracts, the (abstract) ranking component that sorts them by risk level and the adaptation component that deals with faulty components and eventually changes the model.
+
+A Java agent is used to transform the classes at runtime; in order to perform the instrumentation directly in the Bytecode, it relies on the ASM library.
 
 \section{Evaluation}
