@@ -4,7 +4,7 @@ Nowadays complex applications (with several components) often cohabits in the sa
 
 \section{Proposition}
 
-The \textsf{Spacegoat} framework reduces the overhead since it does not imply the instrumentation of all components at runtime, which is very costly. Actually the monitoring system starts with \emph{global monitoring}, detecting a fault with only informations from the JVM (memroy, CPU and I/O usage). In order to know which component is faulty in the JVM, the framework sorts all the components by risk of causing the problem. The component with the largest risk is instrumented first (accordingly to the problem i. e. if the problem is an important memory usage, only memory instructions will be monitored) for a couple of ms (cf Listing 2 in the original paper). If the instrumentation shows that this component does not respect its contract specified to the framework, it is declared faulty, and the \emph{localized} instrumentation stops here. Otherwise, the component having the second largest risk is instrumented, and so on. 
+The \textsf{Spacegoat} framework reduces the overhead since it does not imply the instrumentation of all components at runtime, which is very costly. Actually the monitoring system starts with \emph{global monitoring}, detecting a fault with only informations from the JVM (memroy, CPU and I/O usage). In order to know which component is faulty in the JVM, the framework sorts all the components by risk of causing the problem. The component with the largest risk is instrumented first (accordingly to the problem i. e. if the problem is an important memory usage, only memory instructions will be monitored) for a couple of ms (cf Listing 2 in the original paper). If the instrumentation shows that this component does not respect its contract specified to the framework, it is declared faulty, and the \emph{localized} instrumentation stops here. Otherwise, the component having the second largest risk is instrumented, and so on. That is the \emph{adaptative monitoring} mode.
 
 To sort the possibly faulty components, the framework use customizable heuristics. The simplier heuristic is to high rank the most recently added component, and the components that interact with them. Besides the contract can defines limit of memory, CPU, I/O usage and number of messages exchanged for example.
 
@@ -19,3 +19,15 @@ The selection of the monitoring type (global, full, localized, adaptative) is wo
 A Java agent is used to transform the classes at runtime; in order to perform the instrumentation directly in the Bytecode, it relies on the ASM library.
 
 \section{Evaluation}
+
+The \textsf{Spacegoat} framework is evaluated regarding two dimensions: the dalay to find a faulty component, and the overhead induced by the instrumentation. In order to do these evaluations, a real application have been adapted to use \textsf{Spacegoat}. 
+
+Overhead can be measured without faulty component, by enforcing a monitoring mode with the \textsf{DaCapo} benchmark. It appears that full monitoring must be avoid, and the authors demonstrate that their results are comparable (and even better) to the current state-of-the-art. 
+
+For the detection delay, faulty components -- exceeding voluntary some limits in their contract -- are injected in the application. Two variables habe been studied to simulate different application configurations (number of components in the application, number of classes in a component). 
+
+Finally some experiments show that the heuristic (for sorting the components by risk) is important in order to reduce the delay when being in adaptative monitoring mode.
+
+\section{Conclusion}
+
+The presented framework reaches a good trade-off between the instrumentation overhead and the detection delay thanks to an adaptative monitoring, and largely decreases the overhead. There is yet a drawback since the user must write himself the components' contracts, which is not easy nor accurate. Moreover if the contract is written whereas the component is already faulty, it may trick the framework and this one will lose time instrumenting other healthy components. 
