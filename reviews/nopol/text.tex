@@ -1,14 +1,23 @@
 \section{Introduction}
 
+Automatic repair helps developpers to debug quickly their applications: this technique do not always provide an optimal solution but can suggest working bug fixes, that can help to discover the bug root. \textsf{Nopol} is an automatic repair tool which can detect buggy or missing \verb!IF! conditions for \textsf{Java} codes. To do so it uses a test-suite with at least one test failing and the others passing, then it proposes a patch to pass all test. This workflow is very convenient since most of big applications have a test-suite (at leat non-regression test), which can be run at every application build (right after a commit for example, or every night). A real-world application would be to use \textsf{Nopol} directly in build/test management systems (as \textsf{Jenkins} or \textsf{Bamboo}) to provide to the developper a summary of the build (passing/failing tests, by commit) and possible bug fixes (if there are failing tests).
 
 \section{Proposition}
 
+\textsf{Nopol} takes in input a program (not the source code) and a test-suite with at least one failing test. Then it searches possible fixes -- this process is called \emph{angelic fix localization} -- and collects some object status/values at these localizations. A possible fix is associated to a place in the code, and to a boolean (because only \verb!IF! conditions are repaired). The next step is to translate the collected object informations in constraints in order to obtain the right fix boolean. The problem is solved thanks to a Satisfiability Modulo Theories (SMT) tool, and finally translated in a \textsf{Java} code. The last step is to provide a patch, with the bug fix at the right place.
+
+The angelic fix localization works as follow: in the case of buggy \verb!IF! condition it executes the application with value \verb!true! or \verb!false! for each condition. So if there are $n$ \verb!IF!, at most $2n$ possibilities are executed for each failing test. The possible fixes are found where the originally failling test now passes with an negative boolean in a \verb!IF! condition. Then \textsf{Nopol} rank the different possible fix localization with the Ochiai metric: roughly speaking most suspicious condition is the one that leads to fail all tests.
+
+To form an expression in SMT, \textsf{Nopol} uses informations collected about objects at runtime. For primitive type, their value is saved at each angelix fix location. For other objects, the same thing is done with nullness information, and ``state query methods'' (the user has to manually add them to \textsf{Nopol}). The expression evaluation must be the expected outcome at the angelix fix location: SMT tool says if it can reach the angelic outcome (that is a boolean in our case) in this context (with all objects informations, synthetized in some \emph{building blocks}). 
 
 \section{Implementation}
 
 
+
 \section{Evaluation}
 
+--> not symbolic execution but instrumentation at runtime ... time evaluation ?
 
 \section{Conclusion}
 
+--> not the fault localization but the repair localization ... really efficient ? It can lead to leave the root bug ... and to allow more other related bugs.
