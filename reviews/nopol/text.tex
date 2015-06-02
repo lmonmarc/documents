@@ -12,12 +12,18 @@ To form an expression in SMT, \textsf{Nopol} uses informations collected about o
 
 \section{Implementation}
 
+\textsf{Nopol} relies on some different tools, the two principal ones are \textsf{Spoon} and \textsf{CVC4}, it also uses \textsf{GZoltar} and \textsf{jSMTLIB}. The buggy program is instrumented with \textsf{Spoon} (in order to do the angelic localization, and to write the patch). Then the SMT solving tool used is \textsf{CVC4}.
 
+The implementation has several limitations. For example the building blocks cannot use the $/$ operator and \textsf{CVC4} has not a full non linear arithmetic support. Moreover the ``state query methods'' are only a subset of all methods that can be used in an \verb!IF! condition: all methods with parameters (especially method with an object in parameter) cannot be used by \textsf{Nopol} to build a condition. Last but not least the current implementation works with only one buggy \verb!IF! condition (maybe due to the angelic localization algorithm structure).
 
 \section{Evaluation}
 
---> not symbolic execution but instrumentation at runtime ... time evaluation ?
+The evaluation is made with three examples, but only the bug fix is studied. There is no time evaluation, only the second example is said to take a few seconds to solve. However this tool differentiates from other by several points, including the use of runtime instrumentation instead of symbolic execution. Consequently there is no measure of the possible gain enabled by the use of runtime instrumentation.
+
+The first example is a TCAS\footnote{TCAS (for Traffic allert and Collision Avoidance System) is a real code used in air traffic control, it is often used in software verification examples because it is hard to analyses, with a lot of conditions and so branches.} snippet, it is run and compared to the result of a similar tool (\textsf{SemFix}). \textsf{Nopol} finds a solution, but different from the other tool. In the second example, \textsf{Nopol} finds a bug fix in the percentile method of the Apache Commons-Math Library. As these two examples are buggy \verb!IF! conditions, the last one covers a missy condition in a artificial example.
 
 \section{Conclusion}
 
---> not the fault localization but the repair localization ... really efficient ? It can lead to leave the root bug ... and to allow more other related bugs.
+\textsf{Nopol} is a tool for automatic repair or buggy \verb!IF! conditions. It works fine with some limitations and provides a new repair paradigm: instead of focusing on the fault localization (the bug root), it focuses on the possible repair locations. 
+
+%--> not the fault localization but the repair localization ... really efficient ? It can lead to leave the root bug ... and to allow more other related bugs.
