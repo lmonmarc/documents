@@ -1,0 +1,70 @@
+\documentclass[11pt,onecolumn]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[french]{babel}
+
+\usepackage{graphicx}
+\graphicspath{{./img/}}
+
+\usepackage{geometry}
+\geometry{hmargin=3cm,vmargin=3cm}
+
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{subcaption}
+\usepackage{amsmath}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true}
+
+
+\begin{document}
+
+\input{0-Garde.tex}
+
+\tableofcontents
+
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+%% \chapter{Centre de recherche et cadre de travail}
+%% \chapter{Bibliothèque de stencils basée sur SYCL}
+%% \chapter{Utilisation de StarPU et intégration dans QIRAL}
+
+%% Intro:
+%% -> contexte
+%% -> problématique
+%% -> contribution
+
+%% Chap2:
+%% -> contexte
+%% -> état de l'art
+%% -> problématique
+
+%% Chap3:
+%% -> proposition (aspect théorique)
+
+%% Chap4:
+%% -> mise en \oe uvre, éléments d'implantation
+%%    i. e. C++, SYCL
+
+%% Chap5:
+%% -> évaluation, présentation résultat
+
+%% Conclusion:
+%% -> ce qui a été fait
+%% -> ce qui aurait pu être fait (qqc de crédible)
+%% -> ce qui reste à faire (à court (plutôt technique), moyen et long terme)
+
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+
+
+\addcontentsline{toc}{chapter}{Bibliographie}
+\nocite{*} %% à commenter
+\bibliographystyle{plain}
+\bibliography{main}
+
+
+\end{document}
