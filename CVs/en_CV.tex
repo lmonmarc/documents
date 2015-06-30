@@ -1,0 +1,79 @@
+\documentclass[10pt,a4paper,sans]{moderncv}        % possible options include font size ('10pt', '11pt' and '12pt'), paper size ('a4paper', 'letterpaper', 'a5paper', 'legalpaper', 'executivepaper' and 'landscape') and font family ('sans' and 'roman')
+
+% moderncv themes
+\moderncvstyle{classic}                             % style options are 'casual' (default), 'classic', 'oldstyle' and 'banking'
+\moderncvcolor{blue}                               % color options 'blue' (default), 'orange', 'green', 'red', 'purple', 'grey' and 'black'
+%\renewcommand{\familydefault}{\sfdefault}         % to set the default font; use '\sfdefault' for the default sans serif font, '\rmdefault' for the default roman one, or any tex font name
+%\nopagenumbers{}                                  % uncomment to suppress automatic page numbering for CVs longer than one page
+
+% character encoding
+\usepackage[utf8]{inputenc}                       % if you are not using xelatex ou lualatex, replace by the encoding you are using
+
+% adjust the page margins
+\usepackage[scale=0.85]{geometry}
+%\setlength{\hintscolumnwidth}{3cm}                % if you want to change the width of the column with the dates
+
+
+% personal data
+\firstname{Alexandre}
+\familyname{Honorat}
+\title{Engineering student in computer science}                                % optional, remove / comment the line if not wanted
+\address{18 rue de la Tombelle\\24 000 Périgueux\\}{FRANCE}% optional, remove / comment the line if not wanted; the "postcode city" and "country" arguments can be omitted or provided empty
+\mobile{+33(0)6~74~40~60~34}                      % optional, remove / comment the line if not wanted; the optional "type" of the phone can be "mobile" (default), "fixed" or "fax"
+\email{ahonorat@enseirb-matmeca.fr}                 % optional, remove / comment the line if not wanted
+%\homepage{www.johndoe.com}                         % optional, remove / comment the line if not wanted
+%\social[linkedin]{john.doe}                        % optional, remove / comment the line if not wanted
+\extrainfo{Born February 07, 1992}                        % optional, remove / comment the line if not wanted
+%\photo[64pt][0.4pt]{picture}                       % optional, remove / comment the line if not wanted; '64pt' is the height the picture must be resized to, 0.4pt is the thickness of the frame around it (put it to 0pt for no frame) and 'picture' is the name of the picture file
+%\quote{Some quote}                                 % optional, remove / comment the line if not wanted
+
+
+\begin{document}
+\makecvtitle
+
+\section{Personal Profile}
+\cvlistitem{Looking for a PhD thesis or research engineer position in computer science.}
+\cvlistitem{Interested in parallel computing, compilation and programming languages.}
+
+\section{Education}
+\cventry{2012--present}{Engineering school}{Enseirb-Matmeca Graduate School of Engineering}{Bordeaux}{}{Completing fifth year of higher education in computer science, specialized in high performance computing. \\ Master degree in computer science expected 2015.}  % arguments 3 to 6 can be left empty
+\cventry{2009--2012}{\emph{Classes Prépas}}{Pothier High School}{Orléans}{}{Equivalent to the first and second year of a Bachelor's in sciences. Three-year intensive Maths and Physics course in preparation for the selective entrance examination to French engineering school.}
+\cventry{2009}{\emph{Baccalauréat S}}{Bertran de Born High School}{Périgueux}{}{Equivalent to ’A’ levels in Maths, Physics, Sciences, with distinction.}
+
+\section{Experience}
+\cventry{February-July 2015}{Intern}{INRIA}{Bordeaux}{}{Design of a C++ library to use the new parallelism interface \textsf{SYCL}, and to be used as back-end of the specific physicist language \textsf{QIRAL}.}
+\cventry{June-August 2014}{Trainee}{RedBite Solutions}{Cambridge}{}{Participation to continuous integration tests' creation for a Vaadin web application, design of a collection and analysis system for RFID readers' statistics.}
+\cventry{2013--present}{School project}{Enseirb-Matmeca}{Bordeaux}{}{Creating a cache simulator on multi-core architecture, six student team (https://github.com/gpichon/caches-pfa).}
+\cventry{July 2013}{Trainee}{Thales Alenia Space}{Cannes}{}{Organized a file migration process to use a new document management system (DMS).}
+
+\section{Computer Skills}
+
+\begin{cvcolumns}
+  \cvcolumn{Excellent Knowledge}{\begin{itemize}\item C/C++\item JAVA (\& OSGi)\item LaTeX \end{itemize}}
+  \cvcolumn{Parallelism tools}{\begin{itemize}\item MPI \item SYCL \item OpenMP \item OpenCL \end{itemize}}
+  \cvcolumn{Various}{\begin{itemize}\item Makefile \& CMake \item Bash \& Gnuplot \item MySQL \& CouchBase \item Git \& only Git \end{itemize}}
+  %\cvcolumn[0.5]{All the rest \& some more}{\textit{That} person, and \textbf{those} also (all available upon request).}
+\end{cvcolumns}
+\cvitem{OS :}{\emph{Linux}}
+
+\section{Languages}
+\cvitem{French}{Native speaker}
+%\cvitemwithcomment{Anglais :}{Compris et parlé}{Dernier TOEIC (non officiel) : 785}
+\cvitem{English}{Good command, read, spoken and written (TOEIC: 920/990 -- EU level: B2).}
+\cvitem{German}{Good command, read and spoken.}
+%\cvdoubleitem{}{}{}{}
+
+\section{Interests}
+
+\cvitem{Cinema}{Member of the \textsc{Enseirb-Matmeca} movie association.}
+\cvitem{Piano}{Classical Piano, 15 years.}
+\cvitem{Sport}{Mountain-biking.}
+
+%% \section{References}
+%% \begin{cvcolumns}
+%%   \cvcolumn{Category 1}{\begin{itemize}\item Person 1\item Person 2\item Person 3\end{itemize}}
+%%   \cvcolumn{Category 2}{Amongst others:\begin{itemize}\item Person 1, and\item Person 2\end{itemize}(more upon request)}
+%%   \cvcolumn[0.5]{All the rest \& some more}{\textit{That} person, and \textbf{those} also (all available upon request).}
+%% \end{cvcolumns}
+
+\end{document}
