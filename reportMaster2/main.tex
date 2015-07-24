@@ -24,14 +24,6 @@
 \input{0-Garde.tex}
 
 \tableofcontents
-
-\chapter*{Introduction}
-\addcontentsline{toc}{chapter}{Introduction}
-
-%% \chapter{Centre de recherche et cadre de travail}
-%% \chapter{Bibliothèque de stencils basée sur SYCL}
-%% \chapter{Utilisation de StarPU et intégration dans QIRAL}
-
 %% Intro:
 %% -> contexte //nécessité de la programmation parallèle
 %% -> problématique //dur d'écrire du code parallèle (même pour le compilateur)
@@ -57,8 +49,115 @@
 %% -> ce qui aurait pu être fait (qqc de crédible, choix alternatifs par exemple SYCLONE, SkePU, StarPU)
 %% -> ce qui reste à faire (à court (plutôt technique), moyen et long terme) (aspect ditribué ? pour aute algo que stencils comme map/reduce ?)
 
-\chapter*{Conclusion}
-\addcontentsline{toc}{chapter}{Conclusion}
+\chapter*{Remerciements}
+
+DB OA RK SP
+
+\chapter{Introduction}
+%\addcontentsline{toc}{chapter}{Introduction}
+
+\section{Parallélisation d'algorithmes}
+
+Nécessaire pour avoir des résultats en un temps acceptables.
+
+\section{\'Ecriture de code parallèle}
+
+C''est difficile, même pour le compilateur
+
+\section{Choix du niveau d'expression du parallèlisme}
+
+Où décrire le parallèlisme ? Le trouver automatiquement ?
+cf Qiral et Maude
+
+
+\chapter{Extraction et formalisation du parallélisme}
+
+\section{Contexte}
+
+\subsection{Expression du parallélisme}
+
+Langages dédiés aux scientifiques Matlab, QIRAL, Matematica
+
+Langages dédiés au parallèlisme Cilk, SkePU
+
+Runtimes/bibliothèques dédiées au parallèlisme StarPU, Parsec, OpenCL, SYCL, Kokkos, Blitz++, Global Arrays
+
+Classification des algorithmes articles Bones
+
+\subsection{Cas d'application: les stencils}
+
+Jacobi2D
+
+\section{Conception d'un DSEL pour les stencils}
+
+\subsection{Objectifs sémantiques}
+
+De quoi a-t-on besoin pour décrire un stencil
+
+-> indices coefs
+
+-> pattern du stencil
+
+-> tableaux coefs
+
+-> tableaux données
+
+-> abstraire les structurations de données (copies tuiles, et data layout)
+
+\subsection{Objectifs de performances}
+
+-> tuiles/caches (data reuse)
+
+-> calculs à la compilation
+
+\chapter{Bibliothèque de stencils basée sur SYCL}
+
+\section{Présentation générale}
+
+Fonctions disponibles
+
+\section{Détails d'implantation}
+
+C++14 et autres
+
+\section{\'Evolutions possibles}
+
+Reprendre slides : surtout agrégation de stencils
+
+
+
+\chapter{\'Evaluation de la bibliothèque}
+
+
+\section{\'Evaluation qualitative}
+
+Comparaisons d'expressivités (nombre de lignes, nombres de symboles, typage à la compilation), factorisation de code
+Reprendre slides : différents cas de tests
+
+
+\section{Performances quantitatives sur machines dédiées}
+
+Description du matériel
+
+Mesures de temps
+
+Mesures de compteurs
+
+Vérification des valeurs numériques
+
+\chapter{Conclusion}
+%\addcontentsline{toc}{chapter}{Conclusion}
+
+\section{Bilan}
+
+Résumé du reste
+
+Choix alternatifs SkePU, StarPU, SYCLONE
+
+
+\section{Perspetives}
+
+Intégration QIRAL et 4D, Aspects ditribués, MIC, layout, élargissements aux autres cas d'algorithmes (map/reduce)
 
 
 \addcontentsline{toc}{chapter}{Bibliographie}
