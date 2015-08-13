@@ -1,10 +1,11 @@
 all: main
 
-main: main.tex main.bib
+main: main.tex art.bib online.bib ths.bib
 	pdflatex main.tex
-	bibtex main
+	biber main
+	#bibtex main
 	pdflatex main.tex
 	pdflatex main.tex
 
 clean: 
-	rm -f *.aux *.log *~ *.bbl *.blg *.dvi *.toc *.pdf
+	rm -f *.aux *.log *~ *.bbl *.blg *.dvi *.toc *.pdf *.out *.bcf *.run.xml

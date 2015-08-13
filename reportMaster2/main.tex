@@ -1,3 +1,5 @@
+%% -*- eval: (flyspell-mode 1); -*-
+
 \documentclass[11pt,onecolumn]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -15,6 +17,11 @@
 \usepackage{subcaption}
 \usepackage{amsmath}
 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{art.bib}
+\addbibresource{online.bib}
+\addbibresource{ths.bib}
+
 \usepackage{hyperref}
 \hypersetup{colorlinks=true}
 
@@ -24,11 +31,27 @@
 \input{0-Garde.tex}
 
 \tableofcontents
+
+\chapter*{Préambule}
+
+\section*{Cadre}
+
+Ce rapport concerne le stage de fin d'études que j'ai effectué chez INRIA Bordeaux (Institut National de Recherche en Informatique et Automatisme) au sein de l'équipe Storm. Le stage s'est déroulé du $1^{er}$ février $2015$ au $31$ juillet $2015$, encadré par Olivier Aumage et Denis Barthou -- respectivement chargé de recherche et directeur de l'équipe Storm. L'intitulé du stage était \og Extraction automatisée de parallélisme de tâches, et expression dans le formalisme SYCL \fg.
+
+Du point de vue académique ce stage sera évalué à la fois par l'Enseirb-Matmeca dans le cadre du diplôme d'ingénieur en informatique avec spécialité PRCD (Parallèlisme, Régulation et Calcul Distribué) -- et à la fois par l'Université de Bordeaux dans le cadre du master de recherche informatique RSM (Réseaux et Systèmes Mobiles, parcours Calcul Haute Performance). À ce titre mes tuteurs respectifs sont Denis Barthou et Paul Dorbec.
+
+\section*{Remerciements}
+
+Durant toute la durée du stage, Olivier Aumage et Denis Barthou ont répondu à mes nombreuses questions, ce pour quoi je les remercie beaucoup. De plus ils m'ont laissé une grande autonomie sur le code produit, et m'ont permis de voir des aspects très divers de la problématique de base. Par ailleurs Ronan Keryell nous a fortement aidé en nous fournissant la brique de base du stage, un prototype d'implantation de SYCL. Enfin Samuel Pitoiset a eu la patience de m'aider dans l'installation de certains compilateurs, et d'améliorer l'un d'entre eux pour qu'il fonctionne avec notre outil.
+
+
+\input{1-Intro.tex}
 %% Intro:
 %% -> contexte //nécessité de la programmation parallèle
 %% -> problématique //dur d'écrire du code parallèle (même pour le compilateur)
 %% -> contribution //avoir de l'expressivité, exemple entre QIRAL et SYCL pour exécuter des stencils
 
+\input{2-Extraction.tex}
 %% Chap2:
 %% -> contexte
 %% -> état de l'art
@@ -37,133 +60,38 @@
 %% Chap3:
 %% -> proposition (aspect théorique)
 
+\input{3-Biblio.tex}
 %% Chap4:
 %% -> mise en \oe uvre, éléments d'implantation
 %%    i. e. C++, SYCL
 
+\input{4-Eval.tex}
 %% Chap5:
 %% -> évaluation, méthodologie présentation résultat
 
+\input{5-Concl.tex}
 %% Conclusion:
 %% -> ce qui a été fait (résumé)
 %% -> ce qui aurait pu être fait (qqc de crédible, choix alternatifs par exemple SYCLONE, SkePU, StarPU)
 %% -> ce qui reste à faire (à court (plutôt technique), moyen et long terme) (aspect ditribué ? pour aute algo que stencils comme map/reduce ?)
 
-\chapter*{Remerciements}
 
-DB OA RK SP
-
-\chapter{Introduction}
-%\addcontentsline{toc}{chapter}{Introduction}
-
-\section{Parallélisation d'algorithmes}
-
-Nécessaire pour avoir des résultats en un temps acceptables.
-
-\section{\'Ecriture de code parallèle}
-
-C''est difficile, même pour le compilateur
-
-\section{Choix du niveau d'expression du parallèlisme}
-
-Où décrire le parallèlisme ? Le trouver automatiquement ?
-cf Qiral et Maude
-
-
-\chapter{Extraction et formalisation du parallélisme}
-
-\section{Contexte}
-
-\subsection{Expression du parallélisme}
-
-Langages dédiés aux scientifiques Matlab, QIRAL, Matematica
-
-Langages dédiés au parallèlisme Cilk, SkePU
-
-Runtimes/bibliothèques dédiées au parallèlisme StarPU, Parsec, OpenCL, SYCL, Kokkos, Blitz++, Global Arrays
-
-Classification des algorithmes articles Bones
-
-\subsection{Cas d'application: les stencils}
-
-Jacobi2D
-
-\section{Conception d'un DSEL pour les stencils}
-
-\subsection{Objectifs sémantiques}
-
-De quoi a-t-on besoin pour décrire un stencil
-
--> indices coefs
-
--> pattern du stencil
-
--> tableaux coefs
-
--> tableaux données
-
--> abstraire les structurations de données (copies tuiles, et data layout)
-
-\subsection{Objectifs de performances}
-
--> tuiles/caches (data reuse)
-
--> calculs à la compilation
-
-\chapter{Bibliothèque de stencils basée sur SYCL}
-
-\section{Présentation générale}
-
-Fonctions disponibles
-
-\section{Détails d'implantation}
-
-C++14 et autres
-
-\section{\'Evolutions possibles}
-
-Reprendre slides : surtout agrégation de stencils
-
-
-
-\chapter{\'Evaluation de la bibliothèque}
-
-
-\section{\'Evaluation qualitative}
-
-Comparaisons d'expressivités (nombre de lignes, nombres de symboles, typage à la compilation), factorisation de code
-Reprendre slides : différents cas de tests
-
-
-\section{Performances quantitatives sur machines dédiées}
-
-Description du matériel
-
-Mesures de temps
-
-Mesures de compteurs
-
-Vérification des valeurs numériques
-
-\chapter{Conclusion}
-%\addcontentsline{toc}{chapter}{Conclusion}
-
-\section{Bilan}
-
-Résumé du reste
-
-Choix alternatifs SkePU, StarPU, SYCLONE
-
-
-\section{Perspetives}
-
-Intégration QIRAL et 4D, Aspects ditribués, MIC, layout, élargissements aux autres cas d'algorithmes (map/reduce)
-
-
+\phantomsection
+\chapter*{Bibliographie}
 \addcontentsline{toc}{chapter}{Bibliographie}
-\nocite{*} %% à commenter
-\bibliographystyle{plain}
-\bibliography{main}
 
+\nocite{*} %% à commenter
+
+\section*{Articles}
+
+\printbibliography[heading=none,nottype=thesis,nottype=online]
+
+\section*{Thèses}
+
+\printbibliography[heading=none,type=thesis]
+
+\section*{Autres}
+
+\printbibliography[heading=none,type=online]
 
 \end{document}

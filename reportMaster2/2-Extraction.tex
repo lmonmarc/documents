@@ -1,0 +1,42 @@
+%% -*- eval: (flyspell-mode 1); -*-
+
+\chapter{Extraction et formalisation du parallélisme}
+
+\section{Contexte}
+
+\subsection{Expression du parallélisme}
+
+Langages dédiés aux scientifiques Matlab, QIRAL, Matematica
+
+Langages dédiés au parallèlisme Cilk, SkePU
+
+Runtimes/bibliothèques dédiées au parallèlisme StarPU, Parsec, OpenCL, SYCL, Kokkos, Blitz++, Global Arrays
+
+Classification des algorithmes articles Bones
+
+\subsection{Cas d'application: les stencils}
+
+Jacobi2D
+
+\section{Conception d'un DSEL pour les stencils}
+
+\subsection{Objectifs sémantiques}
+
+De quoi a-t-on besoin pour décrire un stencil
+
+-> indices coefs
+
+-> pattern du stencil
+
+-> tableaux coefs
+
+-> tableaux données
+
+-> abstraire les structurations de données (copies tuiles, et data layout)
+
+\subsection{Objectifs de performances}
+
+-> tuiles/caches (data reuse)
+
+-> calculs à la compilation
+
