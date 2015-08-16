@@ -3,10 +3,18 @@
 \chapter{Introduction}
 %\addcontentsline{toc}{chapter}{Introduction}
 
+Un des aspects de la recherche informatique consiste à améliorer des programmes afin de rendre leur temps d'exécution plus rapide, il s'agit du \emph{calcul haute performance} (ou HPC, pour High Performance Computing). Les performances -- en matière de temps d'exécution -- sont primordiales par exemple pour les codes de simulation numérique dédiés à la météorologie qui calculent les prévisions du lendemain, où bien entendu la simulation doit donc s'être terminée en moins d'une nuit. Dans ce cadre le stage a porté sur l'obtention automatique de certains de ces programmes améliorés.
 
-\section{Parallélisation d'algorithmes}
 
-Nécessaire pour avoir des résultats en un temps acceptables.
+\section{Parallélisation de programmes}
+
+Diverses techniques existent pour améliorer les performances d'un programme et plus particulièrement de son temps d'exécution. Deux aspects peuvent entrer en compte : les algorithmes utilisés dans le programme ainsi que le matériel qui l'exécute. Le facteur limitant à améliorer en priorité est alors le matériel, car il influe sur la nature des algorithmes pouvant être utilisés.
+
+La solution la plus simple consisterait à se baser uniquement sur la loi de Moore, c'est-à-dire sur le fait que les capacités du matériel sur lequel le programme est exécuté sont doublées tous les ans. Or cette loi exponentielle n'est maintenant plus tout-à-fait valable puisque par exemple la fréquence d'horloge des processeurs modernes stagne depuis quelques années à une valeur proche de $3$ GHz. C'est cette fréquence d'horloge qui impose au matériel (si celui-ci est constitué de cet unique processeur) le nombre d'opérations qu'il va pouvoir effectuer en une seconde. Puisque la fréquence n'augmente plus, le nombre d'opérations par seconde pour ce type de matériel ne peut plus augmenter non plus, aucun gain de rapidité d'exécution n'est alors possible.
+
+La première solution s'appuyait ainsi sur l'augmentation du nombre d'opérations par seconde supporté par le matériel, possédant \emph{un seul} processeur. Une autre solution est donc d'augmenter le nombre de processeurs, il s'agit de l'introduction du parallélisme dans le matériel. Celui-ci peut s'effectuer de plusieurs manières : à l'intérieur et à l'extérieur du processeur. À l'intérieur, il s'agit soit de subdiviser les instructions en  micro-instructions afin de créer un pipeline (ainsi une instruction peut commencer immédiatement après la fin de la première micro-instruction de l'instruction précédente), soit de dupliquer certains composants de l'architecture afin d'exécuter la même instruction sur plusieurs données à la fois. Les processeurs modernes intègrent tous ces deux technologies : le pipeline d'instructions et l'architecture nommée superscalaire.  À l'extérieur il s'agit de connecter plusieurs processeurs les uns avec les autres, tous participant aux calculs nécessités par le programme de base. Différentes manières de relier les processeurs existent, ils peuvent alors être appelés des cœurs ; dans toute la suite du rapport, un processeur est synonyme d'un ensemble de cœurs connectés entre eux par de la mémoire cache hiérarchique en accès uniforme\footnote{Cette notion sera explicitée au point \ldots~ .}.
+
+En modifiant la nature du matériel (et non seulement ses capacités d'ordre physique comme la fréquence d'horloge) cela induit des modifications dans la façon de transcrire les algorithmes (par exemple pour utiliser le côté superscalaire), ainsi que dans les algorithmes eux-mêmes qui ne sont parfois plus du tout adaptés (notamment à cause des communications entre les processeurs, inexistantes auparavant). Écrire un programme destiné à une machine parallèle nécessite donc des algorithmes souvent très spécifiques à la configuration de la machine d'exécution, ce qui rend leur écriture complexe.
 
 \section{\'Ecriture de code parallèle}
 
