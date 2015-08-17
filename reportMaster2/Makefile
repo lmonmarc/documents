@@ -1,6 +1,6 @@
-all: main
+all: main.pdf
 
-main: main.tex art.bib online.bib ths.bib
+main.pdf: *.tex art.bib online.bib ths.bib 
 	pdflatex main.tex
 	biber main
 	#bibtex main
