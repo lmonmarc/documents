@@ -6,17 +6,38 @@ Le parallélisme dans un programme informatique est difficile à trouver automat
 
 \section{Contexte}
 
-
+Les applications parallèles sont utilisées depuis un certain nombres d'années afin d'obtenir des performances (en matière de rapidité, et en matière de taille du problème traité). Or il est difficile d'écrire des codes parallèles, ce qui a été évoqué au chapitre précédent. À ce titre divers outils pour faciliter la parallélisation sont apparus, tels que \textsf{ParaScope} dès $1989$ \cite{Art24} qui est éditeur de code interactif. Ces outils se décomposent en de nombreuses catégories à la fois par rapport aux utilisateurs qu'ils visent, et à la fois par rapport au parallélisme qu'ils permettent. Le cas d'application des stencils -- qui est le cas d'application du stage -- est alors explicité afin de voir comment interviennent les différents niveaux de parallélisme. 
 
 \subsection{Expression du parallélisme}
 
-Langages dédiés aux scientifiques Matlab, QIRAL, Matematica
+Décrire les problèmes à résoudre et le parallélisme qu'ils peuvent utiliser peut se faire de différentes manières avec les moyens actuels. Notamment il est possible de regrouper quatre catégories qui sont les langages dédiés aux scientifiques (non spécialistes du HPC), les langages pour les développeurs de métier (mais non obligatoirement spécialistes du HPC), l'ensemble des bibliothèques et supports d'exécution spécialisés (destinés aux spécialistes du HPC), et en enfin les outils de formalisation des algorithmes employés (destinés aux spécialistes du HPC).
 
-Langages dédiés au parallèlisme Cilk, SkePU
+\paragraph{Langages dédiés aux scientifiques.}
 
-Runtimes/bibliothèques dédiées au parallèlisme StarPU, Parsec, OpenCL, SYCL, Kokkos, Blitz++, Global Arrays
+\textsf{\href{http://www.wolfram.com/mathematica/}{Mathematica}}
+\textsf{\href{http://fr.mathworks.com/}{MATLAB}}
+\textsf{\href{http://pari.math.u-bordeaux.fr/}{PARI/GP}}
+\textsf{QIRAL} (+\textsf{Maude})
 
-Classification des algorithmes articles Bones
+
+
+\paragraph{Langages dédiés au parallélisme.}
+\textsf{\href{http://chapel.cray.com/}{Chapel}}
+\textsf{\href{https://www.cilkplus.org/}{Cilk}}
+\textsf{SkePU}
+\textsf{X10}
+
+\paragraph{Bibliothèques spécialisées.}
+\textsf{StarPU}
+\textsf{Parsec}
+\textsf{OpenCL}
+\textsf{SYCL}
+\textsf{Kokkos}
+\textsf{Blitz++}
+\textsf{Global Arrays}
+
+\paragraph{Formalisation des algorithmes.}
+\textsf{Bones}
 
 \subsection{Cas d'application: les stencils}
 
