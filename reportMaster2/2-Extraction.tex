@@ -10,40 +10,69 @@ Les applications parallèles sont utilisées depuis un certain nombres d'années
 
 \subsection{Expression du parallélisme}
 
-Décrire les problèmes à résoudre et le parallélisme qu'ils peuvent utiliser peut se faire de différentes manières avec les moyens actuels. Notamment il est possible de regrouper quatre catégories qui sont les langages dédiés aux scientifiques (non spécialistes du HPC), les langages pour les développeurs de métier (mais non obligatoirement spécialistes du HPC), l'ensemble des bibliothèques et supports d'exécution spécialisés (destinés aux spécialistes du HPC), et en enfin les outils de formalisation des algorithmes employés (destinés aux spécialistes du HPC).
+Décrire les problèmes à résoudre et le parallélisme qu'ils peuvent utiliser peut se faire de différentes manières avec les moyens actuels. Notamment il est possible de regrouper quatre catégories qui sont les langages dédiés aux scientifiques (non spécialistes du HPC), les langages et compilateurs pour les développeurs de métier (mais non obligatoirement spécialistes du HPC), l'ensemble des bibliothèques et supports d'exécution spécialisés (destinés aux spécialistes du HPC), et en enfin les outils de formalisation des algorithmes employés (destinés aux spécialistes du HPC).
 
 \paragraph{Langages dédiés aux scientifiques.}
 
 \textsf{\href{http://www.wolfram.com/mathematica/}{Mathematica}}
 \textsf{\href{http://fr.mathworks.com/}{MATLAB}}
 \textsf{\href{http://pari.math.u-bordeaux.fr/}{PARI/GP}}
-\textsf{QIRAL} (+\textsf{Maude})
+\textsf{QIRAL} \cite{Art13,Art14} (+\textsf{Maude} \cite{Art12})
 
 
 
 \paragraph{Langages dédiés au parallélisme.}
 \textsf{\href{http://chapel.cray.com/}{Chapel}}
 \textsf{\href{https://www.cilkplus.org/}{Cilk}}
-\textsf{SkePU}
-\textsf{X10}
+\textsf{\href{http://upc.lbl.gov/}{UPC}}
+\textsf{Par4All} \cite{Ths2}
+\textsf{Lime} \cite{Art8}
+\textsf{\href{http://x10-lang.org/}{X10}}
+C-like SIMD langauge, so complicated \cite{Art10}
+
+plus le programme \textsf{Eclipse \href{http://www.eclipse.org/ptp/}{PTP}} (Parallel Tools Platform) \cite{Art23,Art25}
 
 \paragraph{Bibliothèques spécialisées.}
+
+\textsf{\href{https://www.khronos.org/sycl}{SYCL}} 
+\textsf{Kokkos} \cite{Web5}
+\textsf{\href{http://hpc.pnl.gov/globalarrays/}{Global Arrays}}
+
+\textsf{Blitz++} \cite{Art5}
+Template pour tableaux \cite{Art2}
+
+\textsf{OpenMP}
+\textsf{OpenCL}
+
 \textsf{StarPU}
 \textsf{Parsec}
-\textsf{OpenCL}
-\textsf{SYCL}
-\textsf{Kokkos}
-\textsf{Blitz++}
-\textsf{Global Arrays}
+
+\textsf{SkePU} \cite{MstThs1}
+
 
 \paragraph{Formalisation des algorithmes.}
+
+Logique de skelettes : 
 \textsf{Bones}
+Classification \cite{Art4}
+Compilateur skeleton based C to CUDA \cite{Art3,Art9}
+
+Logique de composants : 
+Pour les prédictions de temps \cite{Art7}
+Pour la mémoire (et aussi les prédictions) \cite[p.~78]{Ths1} 
 
 \subsection{Cas d'application: les stencils}
 
 Jacobi2D
+Lattice QCD \cite{Art1}
+3.5D blocking \cite{Art11}
+Tiling stencil \cite{Art16}
+Stencil pochoir \cite{Art18}
+A lire ... \cite{Art19}
 
 \section{Conception d'un DSEL pour les stencils}
+
+A relire \cite{Art22}
 
 \subsection{Objectifs sémantiques}
 
