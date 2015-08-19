@@ -23,15 +23,7 @@ Pour atteindre un parallélisme optimal il est souvent nécessaire de descendre 
 
 
 \paragraph{Formalisation des algorithmes.}
-
-Logique de skelettes : 
-\textsf{Bones}
-Classification \cite{Art4}
-Compilateur skeleton based C to CUDA \cite{Art3,Art9}
-
-Logique de composants : 
-Pour les prédictions de temps \cite{Art7}
-Pour la mémoire (et aussi les prédictions) \cite[p.~78]{Ths1} 
+La formalisation des algorithmes parallèles se fait à travers différents outils comme la représentation polyédrique, utilisée lorsqu'il s'agit de parcours de tableaux au sein de boucles affines. Cette représentation permet d'ailleurs de mieux classifier les algorithmes, notamment en squelettes comme dans \textsf{SkePU} et \textsf{Bones} \cite{Art4,Art3,Art9}. Ces squelettes permettent de définir le motif d'accès aux données des tableaux impliqués dans le calcul de façon précise et ainsi de l'optimiser. Un tel exemple de motif -- plutôt général -- est le paradigme de \emph{Map/Reduce} qui est proposé par \textsf{SkePU} (ainsi que par le langage dédié \textsf{Lime} cité plus-haut). Cependant tous les algorithmes ne décrivent pas un calcul : certains sont au contraire destinés à ordonnancer les calculs, c'est-à-dire les répartir sur les différents processeurs disponibles. Encore plutôt à l'état de concept, c'est dans ce but que sont utilisés les \emph{composants} permettant les prédictions (et optimisations) du temps d'exécution tels que dans l'article \cite{Art7}, ainsi que les \emph{conteneurs intelligents} pour la gestion des communications avec la mémoire (et aussi les prédictions de temps) dans \textsf{SkePU} \cite[p.~78]{Ths1}.
 
 \subsection{Cas d'application: les stencils}
 
