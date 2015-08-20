@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+\tikzstyle{place}=[circle,thick,draw=blue!75,fill=blue!20,minimum size=2mm]
+
+\node[place] (p1) at (0,0) {};
+\node[place] (p2) at (0,1) {};
+\node[place] (p3) at (1,0) {};
+\node[place] (p4) at (-1,0) {};
+\node[place] (p5) at (0,-1) {};
+
+\node[place] () at (-1,-1) {};
+\node[place] () at (-1,1) {};
+\node[place] () at (1,-1) {};
+\node[place] () at (1,1) {};
+
+\foreach \x in {-2,...,2}
+{
+  \node[place] () at (\x,2) {};
+  \node[place] () at (\x,-2) {};
+  \node[place] () at (2,\x) {};
+  \node[place] () at (-2,\x) {};
+}
+
+\draw[->] (p2) to (p1);
+\draw[->] (p3) to (p1);
+\draw[->] (p4) to (p1);
+\draw[->] (p5) to (p1);
+
+\tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=2mm]
+
+\foreach \x in {-3,...,3}
+{
+  \node[place] () at (\x,3) {};
+  \node[place] () at (\x,-3) {};
+  \node[place] () at (3,\x) {};
+  \node[place] () at (-3,\x) {};
+}
+
+
+
+\end{tikzpicture}
