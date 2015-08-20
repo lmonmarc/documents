@@ -1,0 +1,20 @@
+\section{Validation de l'implémentation}
+
+Le programme se décompose en de nombreuses étapes, les sources d'erreurs sont donc multiples. Deux sont particulièrement critiques et doivent pouvoir être testées afin d'assurer l'utilisateur du bon fonctionnement : il s'agit de l'éclatement des données sur les processus ainsi que les calculs locaux suivant l'algorithme de Fox.
+
+\subsection{Distribution des données}
+
+La distribution des données dans les processus est effectuée grâce à la fonction \texttt{MPI\_Scatterv}. En décrivant un type de donné associé représentant un bloc de la matrice $A$ ou $B$, cette fonction permet l'envoi des blocs $(i,j)$ de la matrice aux processus $(i,j)$ de la grille\footnote{L'implémentation de cette distribution est fortement inspirée d'une solution disponible sur \href{http://stackoverflow.com/questions/7549316/mpi-partition-matrix-into-blocks}{Stack Overflow}.}.
+
+En ce qui concerne le rassemblement des blocs du résultat $C$, le fonctionnement est analogue et met en jeu les mêmes types de données, via la fonction \texttt{MPI\_Gatherv}. Les deux fonctions (éclatement et rassemblement) sont d'ailleurs abstraites dans une seule et même fonction dans le projet.
+
+Une légère difficulté apparaît cependant lorsque les matrices $A$ et $B$ n'ont pas un tailles multiple de la taille de la grille (de taille la racine carrée entière inférieure du nombre total de processus) car cela entraîne que tous les processus ne vont pas traiter des blocs de la même taille. Pour éviter de devoir gérer des blocs de tailles différentes, une solution simple consiste à rajouter des $0$ sur le bord droit et sur le bas des matrices afin de rendre leur taille totale multiple de la taille de la grille. Les additions avec des multiplications par $0$ ne changent ainsi pas le résultat, et nécessitent pas de calculs supplémentaire par rapport aux blocs normaux. Ces calculs superflus ne sont de toute façon pas néfastes puisque si un processus avait des blocs plus petits à traiter, il serait de toute façon obligé d'attendre les autres entre chaque étape.
+
+\subsection{Résultat de la multiplication}
+
+Les multiplications de matrices réalisées par chacun des processus dans l'algorithme de Fox sont déléguées à la librairie BLAS par l'appel de la fonction \texttt{cblas\_dgemm}. La véracité des résultats n'est donc pas mis en doute. En revanche les échanges de blocs -- envois, \emph{broadcasts} -- peuvent être mal programmés, et le résultat global faux. 
+
+Une vérification est donc faite de la manière suivante : le résultat global est calculé par la librairie BLAS à partir des matrices $A$ et $B$ complètes. Ce résultat est ensuite comparé à notre résultat, élément par élément, si l'erreur est inférieure à un seuil défini, le test passe. Notons que ce test peut être effectué pour des matrices de taille variable, dont les éléments sont choisis aléatoirement. En dehors des tests, il est possible de charger une troisième matrice lors de l'exécution du binaire \texttt{main}, qui servira de référence et avec laquelle sera comparé le résultat fourni par l'implémentation.
+
+
+

@@ -1,0 +1,25 @@
+\section*{Introduction}
+
+\paragraph{Le sujet}
+Ce TDP propose de simuler un nuage de particules avec interactions gravitationnelles. Cette simulation doit se faire de manière distribuée à l'aide de la bibliothèque MPI. On dispose d'un modèle physique discret dont les formules de mises à jour des positions, vitesses et accélérations sont imposées et donnés dans l'équation (\ref{eq:modele_physique}).
+
+\begin{equation}
+\left \{
+   \begin{array}{r c l}
+      \overrightarrow{a_i} & := & \sum_{j \in P}{\overrightarrow{F_{i,j}}} \\
+      \overrightarrow{v_i} & := & \overrightarrow{v_i} + \overrightarrow{a_i} dt\\
+      
+      \overrightarrow{p_i} & := & \overrightarrow{p_i} + \overrightarrow{v_i} dt + \overrightarrow{a_i} \frac{dt^2}{2}\\
+   \end{array}
+\right.
+   \text{~ avec ~}
+   \overrightarrow{F_{i,j}} =  G\frac{m_j}{\|\overrightarrow{p_i}-\overrightarrow{p_j}\|^3}(\overrightarrow{p_i}-\overrightarrow{p_j})
+\label{eq:modele_physique}
+\end{equation}
+
+Le sujet précise aussi des optimisations à mettre en \oe uvre pour accélérer le calcul et le rendre plus juste. Citons par exemple l'utilisation du \emph{double buffering}, des communications persistantes, du recouvrement des communications par le calcul et de l'utilisation d'un \textbf{dt} variable.
+
+\paragraph{Le rapport}
+Ce rapport décrit le déroulement du projet, les choix d'implémentation que nous avons effectués ainsi que les résultats obtenus.
+
+Nous verrons comment nous avons mis en place cette simulation d'une manière sommaire dans un premier temps, puis plus optimisée dans un second temps. Les performances sont ensuite analysées dans la dernière partie.

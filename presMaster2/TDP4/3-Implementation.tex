@@ -1,0 +1,37 @@
+\section{Implémentation}
+
+Pour paralléliser le programme, la seule fonction à modifier a été la fonction \texttt{img()}, qui effectue le calcul des couleurs des \emph{pixels}. Ci-dessous certains composants de base utilisés sont détaillés du point de vue de l'implémentation.
+
+\subsection{Pile}
+
+Afin de ne pas avoir à écrire une structure de pile, nous avons utilisé l'implémentation CCAN de liste doublement chaînée. Cette implémentation possède les fonctions de base \texttt{add()} (ajoute en début de liste) et \texttt{pop()} (retire le premier élément de la liste et le retourne) qui nous ont permis de l'utiliser comme une pile. Son utilisation se fait en ajoutant un champ \texttt{list\_node} dans la structure servant d'élément de notre liste (structure \texttt{task}).
+
+\subsection{Tuiles}
+
+Nous avons créé une structure tuile, élément essentiel du programme. Cette structure contient :
+\begin{itemize}
+\item[$\bullet$]les coordonnées du \emph{pixel} de début de la tuile ;
+\item[$\bullet$]un tableau de type \texttt{COLOR} servant à stocker les couleurs calculées pour chaque emph{pixel} de la tuile ;
+\item[$\bullet$]les index du dernier \emph{pixel} de la tuile, qui sont utilisés dans le cas particulier où l'une des deux dimensions de l'image n'est pas divisible par la taille d'un côté d'une tuile (en effet, dans cette configuration les tuiles situées sur la bande inférieure ou sur la bande droite sont de tailles réduites) ;
+\item[$\bullet$]un champ \texttt{list\_node}, nécessaire afin de pouvoir utiliser cette structure comme élément de base dans une liste CCAN.
+\end{itemize}
+
+\subsection{Verrou}
+
+Comme expliqué dans la section précédente, afin d'être protégé des accès concurrentiels induits par la programmation \emph{multithreadée}, la pile de tuiles à traiter se doit d'être protégée par un verrou global ou \emph{mutex} dans le cas de \textsf{pthread}.
+
+Ensuite l'utilisation s'est limitée aux deux fonctions \texttt{pthread\_mutex\_lock()} et \texttt{pthread\_mutex\_unlock()}, permettant respectivement de verrouiller/déverrouiller le \emph{mutex}. Ainsi, avant tout accès à la liste de tuiles à traiter, le thread verrouille le \emph{mutex}. S'il est déjà verrouillé, cela a pour effet de le faire attendre jusqu'au déverrouillage. Une fois l'accès effectué, le \emph{thread} appelle la fonction de déverrouillage.
+
+\subsection{Sémaphore}
+
+La sémaphore est initialisée, après le remplissage initial de la pile de tuiles à traiter, en appelant la fonction \texttt{sem\_init()}, avec comme valeur le nombre initial de \emph{threads} pouvant traiter les tâches. Ensuite, pendant l'exécution du programme, les deux fonction \texttt{sem\_post()} et \texttt{sem\_wait()} vont être appelées. La première, par le \emph{thread} de communication après avoir ajouté une nouvelle tâche dans la pile, la seconde par les \emph{threads} de travail lorsque la pile de tâches est vide.
+
+À noter que dans la phase de terminaison, lorsque la pile de tâches est vide, le \emph{thread} de communication va réveiller tous les \emph{threads} en appelant autant de fois \texttt{sem\_post()} que nécessaire, l'objectif étant que ceux-ci appellent alors \texttt{pthread\_exit()} afin qu'ils terminent proprement. En pratique, la valeur de la sémaphore est récupérée puis autant de \texttt{sem\_post()} sont effectués qu'il y a de \emph{threads} endormis, i. e. la différence entre le nombre maximal de \emph{threads} et la valeur de la sémaphore. Ce nombre de \emph{threads} est défini par une constante dans le code, fixé à $2$.
+
+\subsection{MPI}
+
+Quelques choix d'implémentation ont été fait à propos de MPI, le plus important à noter étant le fait de faire des communications à l'origine asynchrones pour la communication en anneau, sans attendre que l'envoi a bien été effectué avec un \texttt{MPI\_Wait}. En effet, le \emph{thread} de communication doit toujours être disponible, et sa réactivité est primordiale. C'est la seule partie du programme qui est tout le temps en attente active. Il est cependant envisageable de rajouter un \texttt{pthread\_yield} lorsque des tâches supplémentaires ont été reçues, afin de rendre plus rapidement la main aux \emph{threads} de calcul. Toutefois nous avons finalement remis des \texttt{MPI\_Send} et \texttt{MPI\_Recv} lors de la reprise du projet. En effet nous pensions que des communications asynchrones non attendues (par \texttt{MPI\_Wait}) pouvaient entraîner plus facilement des \emph{deadlocks}, et nous avons préféré utiliser la fonction la plus sûre sans être trop coûteuse (ces communications ne sont pas synchrones mais bloquantes jusqu'à ce que le message soit correctement envoyé ou reçu).
+
+\subsection{Répartition initiale des tâches}
+
+Chaque processus a accès au fichier décrivant la scène. Ainsi, chaque processus calcule de son côté les tuiles qu'il doit traiter en appliquant l'algorithme des restes chinois, et les ajoute au fur et à mesure dans sa pile locale. La répartition initiale des tuiles se fait donc sans aucune communication interprocessus.

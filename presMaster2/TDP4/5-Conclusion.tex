@@ -1,0 +1,4 @@
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Les objectifs de parallélisation du programme semblent avoir été atteints. Nous avons de plus pensé à quelques optimisations comme l'envoi de plusieurs tâches à la fois lors d'une famine sur un processus, ou l'usage de \texttt{pthread\_yield} qui pourraient encore contribuer à améliorer les performances. Nous regrettons bien sûr de ne pas avoir pu plus tester le programme, mais la tendance des résultats est prédictible et concordante avec nos attentes dans pour la courbe de scalabilité (temps d'exécution en fonction du nombre de processus).

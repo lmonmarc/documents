@@ -1,0 +1,90 @@
+\section{Version minimale}
+
+Dans un premier lieu, nous avons décidé de commencer par faire une version minimale du simulateur de particules. Cette première version modélise les particules, applique les formules pour les mettre à jour en utilisant des communications ni persistantes, ni recouvertes par le calcul et avec un \textbf{dt} constant.
+
+Dans cette partie, nous verrons comment les particules ont été modélisées et comment leurs valeurs sont mises à jour entre chaque itération.
+
+\subsection{Principe de mise à jour des particules}
+
+Le but est d'appliquer les formules de l'équation (\ref{eq:modele_physique}) vue dans l'introduction, sur toutes les particules distribuées dans les différents processus. Chacun des $p$ processus possède en mémoire locale $n$ particules.
+
+Chaque processus est chargé de mettre à jour l'état de ses particules locales, et doit pour chacune de celles-ci calculer les forces induites par toutes les autres particules, y compris celles des autres processus. Afin de connaître les informations sur toutes les particules, les processus communiquent entre eux avec une topologie en forme d'anneau.
+
+Chaque processus reçoit de son voisin un paquet de particule et accumule les forces induites par le paquet reçu, jusqu'à avoir parcouru tous les paquets. En supposant qu'il y ait $p$ processus contenant $n$ particules, la somme est découpée de la façon suivante:
+
+\begin{equation}
+      \overrightarrow{a_i} = \sum_{k=0}^{p-1}{\sum_{j=0}^{n-1}{F(p_i^0,p_j^k)}} 
+\label{eq:accel_paquets}
+\end{equation}
+avec $p_i^k$ la $i^{eme}$ particule du processus $k$. Le processus courant prote le numéro $0$.
+
+Entre chaque élément de la première somme, chaque processus reçoit un nouveau paquet de particules qui écrase un ancien paquet pour garder le caractère distribué des données.
+
+\paragraph{Complexité du calcul}
+
+Chaque processeur doit calculer les forces entre ses particules locales et toutes les autres. La complexité du calcul est en $\theta(pn^2)$ par itération. En terme de communications, chaque processus envoie et reçoit $p$ messages de taille $n$.
+
+Le caractère quadratique des calculs et la taille linéaire des messages font que les communications sont recouvrables par le calcul pour peu que $n$ soit suffisamment grand.
+
+\subsection{Modélisation des particules}
+
+Les particules sont représentées de deux manières différentes selon qu'il s'agisse des particules locales ou distantes. On se place ici toujours en dimension 2.
+
+La force ne dépend que de la position de de la masse de la particule distante, donc ces données suffisent à les modéliser. La structure modélisant les particules distante est alors la suivante:
+\begin{minted}{c}
+struct mpi_particle {
+  double px, py;
+  double mass;
+};
+\end{minted}
+Cette structure est celle utilisée lors des communications, il a donc fallu créer un type MPI qui lui est associé avec \texttt{MPI\_Type\_create\_struct} que nous avons nommé \texttt{MPI\_Type\_particles}.
+
+Les particules locales possèdent en revanche d'autres propriétés comme la vitesse et l'accélération:
+\begin{minted}{c}
+struct particle {
+  double px, py;
+  double vx, vy;
+  double ax, ay;
+  double mass;
+};
+\end{minted}
+
+\subsection{Communications}
+
+Dans cette première version, les communications se font de manière non persistante et ne sont pas recouvertes par du calcul. Chaque processus reçoit du processus précédent et envoie vers le processus suivant.
+
+Les communications sont faites de la manière suivante:
+\begin{minted}{c}
+for(i=0; i<nb_proc-1; i++){
+    MPI_Isend(particles_current, [...], rank+1, [...], &send_request);
+    MPI_Irecv(particles_next, [...], rank-1, [...], &recv_request);
+    MPI_Request requests[] = {send_request, recv_request};
+    MPI_Waitall(2, requests, [...]);
+    
+    [Calcul sur particles_current]
+    
+    SWAP(particles_current, particles_next);
+}
+\end{minted}
+Le double buffering est effectué sur les buffers \texttt{particles\_current} et \texttt{particles\_next} qui sont échangés à chaque tour de boucle. \texttt{particles\_current} est le buffer contenant le paquet de particules qui induisent les forces calculées à ce tour de boucle, alors que \texttt{particles\_next} est le paquet suivant qui a déjà été reçu.
+
+Les communications asynchrones permettent d'envoyer et de recevoir en même temps et ainsi de gagner du temps par rapport à des communications synchrones. Avec des communications asynchrones, il est déjà possible de recouvrir par le calcul en plaçant ce dernier avant le \texttt{MPI\_Waitall} mais il faut alors faire attention de ne pas modifier le buffer d'envoi.
+
+
+
+
+\subsection{Visualisation et benchmark}
+
+Un travail à été fait pour permettre d'exécuter la simulation sur plusieurs itérations et de visualiser le résultat. Des outils de benchmark ont aussi été mis en place.
+
+Des paramètres d'exécutions permettent de modifier plusieurs paramètres, tels que l'utilisation d'un fichier d'entrée, la génération ou non de données de visualisation, etc...
+
+\subsubsection{Visualisation}
+
+La visualisation se fait à l'aide d'un script GNUPlot. Le programme génère un fichier de données et le script affiche ces données sous la forme d'une image GIF animée. Les particules sont représentées par des cercles dont le rayon représente la masse de la particule.
+
+Lors de la génération des données, une image est générée à intervalle constant (en temps de simulation), même avec un dt variable. En accordant la fréquence de rafraîchissement du GIF dans le script GNUPlot à cet intervalle, nous voyons le déroulement de la simulation à vitesse normale
+
+\subsubsection{Benchmark}
+
+Le temps de calcul total est relevé avec \texttt{gettimeofday} afin de mesurer les performances du simulateur. Différents scripts permettent de générer automatiquement des graphiques des performances.

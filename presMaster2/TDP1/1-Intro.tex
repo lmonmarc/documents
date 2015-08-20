@@ -1,0 +1,13 @@
+\section*{Introduction}
+
+L'objectif de ce premier TDP est d'implémenter des routines BLAS et d'analyser leur comportement. Il ne s'agit pas ici d'écrire la bibliothèque la plus performante possible, mais plutôt de comprendre quels sont les facteurs qui influent sur les performances et de donner des idées d'optimisations.
+
+Dans ce rapport, nous décrirons dans un premier temps le protocole d'évaluation de nos routines BLAS, comprenant des tests de validation ainsi que des \emph{benchmarks}. Ensuite nous analyserons les deux algorithmes principaux que nous avons implémentés, à savoir le produit scalaire et le produit matriciel. Nous expliquerons ces deux algorithmes, ainsi que les optimisations que nous avons effectuées, puis nous analyserons les résultats des \emph{benchmarks}.
+
+%Dans ce premier TDP, le sujet étudié concerne l'implémentation de routines basiques d'algèbre linéaires -- BLAS, pour Basic LinearAlgebra Subroutines --, notamment un produit vectoriel (\verb!ddot!) et un produit matriciel \verb!dgemm!). L'objectif principal est de rendre ces routines performantes et comparables avec des implémentations déjà existantes telles que MKL (Intel Math Kernel Library) par exemple.  
+
+%L'implémentation des routines a été réalisée par étapes : d'abord de manière séquentielle (pour \verb!ddot! et \verb!dgemm!), puis séquentielle par bloc et enfin parallèle (uniquement \verb!dgemm!). Des fonctions ont aussi été créées afin de valider les fonctions implémentées : d'une part pour vérifier les résultats (par comparaison avec une librairie officielle), d'autre part pour réaliser des \emph{benchmark} de notre propre librairie.\\
+
+%Le prototype des routines suit celui celui du fichier \texttt{cblas.h}, et celles-ci sont compilées au sein d'une librairie dynamique. En plus de la librairie, le projet compile deux exécutables, \texttt{test-myblas} et \texttt{benchmark}, qui permettent pour le premier une vérification des résultats numériques et pour le second la création de statistiques de puissance de calcul en MFlop/s.
+
+%L'ensemble du projet est compilé grâce à \textsf{CMake}. La détection d'une librairie BLAS ainsi que d'une librairie de \emph{threads} est automatique, et nécessaire pour la compilation.

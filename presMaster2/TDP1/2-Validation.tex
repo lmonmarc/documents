@@ -1,0 +1,59 @@
+\section{Protocole d'évaluation}
+
+Cette partie décrit la manière dont nous avons procédé afin d'avoir une analyse correcte de nos algorithmes. D'une part nous avons procédé à des tests de validation afin de s'assurer que les algorithmes analysés étaient bien corrects, et d'autre part nous avons effectué des mesures sous la forme de \emph{benchmarks} afin d'analyser quantitativement les performances.
+
+\subsection{Tests de vérification}
+
+Les test de vérification s'assurent que les algorithmes analysés sont corrects, en mesurant l'écart entre les résultats obtenus et les résultats attendus. Dans cette partie nous détaillerons pourquoi et comment nous avons effectué ces tests, et enfin nous nous intéresserons aux améliorations que l'on pourrait y apporter.
+
+
+\subsubsection{Intérêt dans le cadre du TDP}
+
+Il est important de vérifier l'implémentation des algorithmes implémentés par des tests afin que le résultat soit correct. Cependant, dans le cadre de ce TDP, nous ne nous intéressons pas particulièrement à la précision des réponses données, mais plutôt aux manipulations de données effectuées par les algorithmes. 
+
+Dans tous les cas, afin de comparer nos algorithmes avec des algorithmes d'autres librairies standard, il est nécessaire qu'ils résolvent les mêmes problèmes. Les valeurs trouvées lors des benchmarks n'auraient aucune valeur si l'algorithme ne calculaient pas le bon résultat.
+
+De plus, ces tests nous permettent de vérifier que les optimisations successives ne changent pas les valeurs calculées en sortie. Des optimisations qui rendent l'algorithme invalide ne sont en effet pas intéressantes.
+
+    
+\subsubsection{Mise en \oe uvre}
+
+Les tests mis en oeuvre sont des tests comparatifs avec des librairies système. Les résultats des routines que nous avons implémentées sont comparés aux résultats d'une librairie système. La librairie principalement utilisée est l'implémentation d'Intel \textsf{MKL}. Nous avons aussi essayé avec \textsf{cblas} de \textsf{Netlib} et \textsf{OpenBlas}. Les routines testées sont les diverses implémentations de \texttt{ddot} et \texttt{dgemm}. 
+
+Les entrées utilisées sont générées aléatoirement à chaque exécution des tests, et les résultats sont comparés avec un résultat de référence par erreur relative. On calcule le résultat pour une entrée aléatoire, à la fois avec la routine de référence et avec la routine à tester. Ensuite nous comparons les résultats obtenus en calculant l'erreur relative pour chaque élément; si elle est inférieure à un certain seuil, nous considérons que les résultats sont égaux. La valeur du seuil choisie est de $10e^{-06}$, afin de vérifier que les valeurs calculées ne sont pas trop éloignées de la valeur réelle sans se préoccuper d'éventuelles erreurs d'instabilité numérique.
+
+Cette comparaison est effectuée sur des matrices générées aléatoirement, elle permet donc de tester la validité de la librairie pour un certain nombre de conditions différentes (taille de matrice, écart d'échelle entre les éléments), et ce de manière simple et automatisée.
+
+\subsubsection{Réflexions}
+  
+La vérification par comparaison avec une autre librairie est discutable. D'une part la librairie prise comme référence est susceptible de contenir des erreurs, et d'autre part ce type de tests crée des dépendances. En général il est préférable d'avoir des tests indépendants basés sur des réalités mathématiques avérées plutôt que sur une autre librairie qui n'est pas infaillible. De manière générale, la méthode la plus sûre est donc de tester la librairie sur des opérations avec des entrées pour lesquelles on connaît les sorties. De cette manière, les tests sont autonomes et ne dépendent pas de la robustesse d'une autre librairie. 
+
+Cependant, le but de ce TDP est d'analyser les performances des algorithmes testés, tout en les comparant avec leurs équivalents contenus dans des librairies de référence. De ce fait, il nous a semblé logique d'effectuer des tests comparatifs avec des librairies de référence. Ce type de tests, pouvant être effectués, sur des matrices aléatoires nous a semblé plus robuste que des tests unitaires. Ils sont aussi plus simples à mettre en place, notamment lorsque la taille des matrices à tester augmente.
+
+\subsection{\emph{benchmark}}
+
+Les \emph{benchmarks} permettent de chiffrer la performance des algorithmes implémentés afin d'observer précisément leur comportement selon différents paramètres. Nous ferons varier différents paramètres, comme la taille des données en entrée afin de corréler le comportement de la librairie avec les facteurs connus pouvant influencer les performances.
+
+Les statistiques obtenues sur les performances pourront aussi être comparées au différentes librairies pré-existantes ou aux performances théoriques afin de trouver des axes de réflexion pour améliorer les algorithmes. Le but est de comprendre quels sont les facteurs qui modifient les performances, et quelles sont les solutions pour réduire l'impact de ces facteurs sur ces dernières.
+
+\subsubsection{Conditions de tests}
+
+Les \emph{benchmarks} effectués concernent les différentes routines \verb!ddot! et \verb!dgemm! que nous avons implémentées. Les performances enregistrées sont calculées en MFlop/s, ce qui permet de se faire une idée du pourcentage d'utilisation des ressources.
+
+le matériel utilisé est celui d'un noeud de la plateforme \textsf{Plafrim} composé de deux processeurs Intel Xeon X5550 composés chaqu'un de 4 coeurs cadencés à 2.66GHz capable d'effectuer 8 calculs flottants double précision par cycle. La puissance théorique de ce processeur est de 21,28GFlop/s par coeur.
+
+Les routines sont codées en C et compilées avec le compilateur Intel en utilisant comme librairie BLAS comparative la librairie MKL. Le niveau d'optimisations utilisé est le niveau O2 du compilateur Intel qui permet d'effectuer quelques optimisations, sans pour autant optimiser les accès mémoire ou la vectorialisation.
+
+Les mesures sont effectuées en calculant le temps de 10 exécutions des algorithmes. Le temps obtenu est alors divisé par 10 fois le nombre d'opérations théorique des algorithmes afin d'obtenir une mesure en MFlop/s. La mesure de temps d'exécution de fait avec la fonction \texttt{gettimeofday} dont on estime que la granularité est suffisante pour les grandeurs calculées.
+
+L'espace mémoire est toujours réutilisé, les valeurs peuvent donc rester en cache d'une exécution à l'autre. Pour tester de manière plus complète notre librairie, il serait possible de vider les caches après chaque exécution, en écrivant d'autres données par exemple.
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,35 @@
+\section{Implémentation des différentes versions}
+
+Trois versions différentes ont été implémentées à partir de la version séquentielle, il s'agit de deux versions multi-threadée sur un seul c\oe ur et d'une version mono-threadé sur plusieurs c\oe urs.
+
+\subsection{OpenMP}
+
+La version OpenMP a simplement consisté à paralléliser les deux boucles de calcul du programme (voisins + mise-à-jour) en utilisant la directive \texttt{\#pragma omp parallel for}. Comme les boucles sont à deux étages, il y a deux options.
+
+On peut paralléliser uniquement la boucle extérieure : on distribue des colonnes aux threads. Il y a moins d'overhead OpenMP vu que la distribution est plus rapide, mais par contre certains threads peuvent avoir plus de travail vu que le nombre de colonnes n'est pas forcément divisible par le nombre de threads.
+
+On peut également paralléliser les deux boucles : la distribution est plus équilibrée car le grain est plus fin (cellule). Toutefois, on peut avoir une légère perte de localité par rapport à la distribution par colonnes. De plus cette distribution demande plus d'overhead OpenMP.
+
+Si l'on utilise bien le cache, alors les performances ne devraient pas dépendre du caractêre NUMA de la machine. Toutefois, on peut utiliser le mécanisme de First Touch pour avoir une meilleure localité des donnnées. Cela consiste à assigner chaque thread a un coeur, et à faire initialiser par ce thread les données qu'il aura à traiter, afin qu'elles soient chargées en cache. On pourrait assigner plus d'un thread par coeur (hyperthreading), mais cela n'est pas intéressant ici car les calculs se font exclusivement sur des entiers, donc les unités de calculs entières sont utilisées en permanence, il n'y a pas de trous à combler.
+
+Au niveau du caractêre privé/partagé, par rapport à OpenMP, des variables utilisées dans la boucle, $i$ et $j$ doivent être privées. De plus le tableau de cellules et celui du nombre de voisins sont, selon le calcul, soit accédé uniquement en lecture seule, soit les threads y écrivent tous à des endroits différents, donc on peut les partager entre les threads.
+
+\subsection{Pthread}
+
+Nous n'avons pas réussi à obtenir une version pthread fonctionnelle dans les temps. Toutefois, voici les pistes reflexions à propos de cette version.
+
+Tout d'abord, il faut découper la carte en tuiles carrées, chaque thread gérant une tuile. On peut donc implémenter des fonctions auxiliaires effectuant, pour un bloc donné, le comptage des voisins, ou la mise-à-jour. Afin de simplifier les choses, on peut prendre d'une part une taille de blocs diviseur de la taille de la grille, et d'autre part on peut prendre un nombre de thread carré, afin d'avoir bien un bloc pour un thread.
+
+Deux barrières de synchronisation sont ensuite à mettre en place, mais uniquement avec les blocs adjacents, l'une avant le comptage des voisins, l'autre avant la mise à jour. Cela peut se faire en utilisant des sémaphore et des cond\_wait. À noter que comme il n'y a pas de barrière de synchronisation globale, il faut déléguer la mise-à-jour des cellules fantômes aux différents blocs. Une idée serait de laisser ce travail aux threads gérant des blocs sur les bordures : dès qu'un thread en bordure a fini de mettre à jour son bloc, il copie les cellules du bord vers les cellules fantômes du côté opposé de la carte.
+
+la synchronisation peut se faire à l'aide de sémaphores et de pthread\_cond. On alloue pour ça un tableau de sémaphore de taille le nombre de blocs, ainsi qu'un tableau de pthread\_cond de la même taille.Les valeurs des sémaphores correspondent au nombre de blocs voisins qui sont synchronisés. La sémaphore d'un bloc donné vaut donc 0 au début d'un calcul (voisins ou mise à jour), puis au fur et à mesure, les blocs voisins qui auront terminé vont aller incrémenter la sémaphore du bloc. Après avoir incrémenté une sémaphore, un bloc vérifie si elle est arrivée à la valeur 8 (cela signifie que tous les voisins sont synchronisés et qu'on peut passer à l'étape suivante). Si c'est le cas, alors le thread va appeler \texttt{pthread\_cond\_signal()} afin de réveiller le thread, qui de son côté s'était mis en attente via un appel à \texttt{pthread\_cond\_wait()}. Ensuite, à chaque nouveau calcul on rénitialise les sémaphores à 0.
+
+De plus, lorsqu'un thread est reveillé, il doit tout de même vérifier que sa sémaphore vaut bien 8, car les appels à \texttt{pthread\_cond\_wait()} ne sont pas fiables.
+
+\subsection{MPI}
+
+L'implémentation MPI de base consite à éclater la grille (carrée) de départ des cellules sur plusieurs processus ; on suppose que le nombre de processus est un carré d'entier, il est donc aisé de réaliser cet éclatement : chaque processus prenant en charge un bloc carré de largeur la largeur totale de la grille divisée par la racine carrée du nombre de processus. Si le nombre de processus n'est pas un carré d'entier, alors c'est le carré d'entier immédiatement inférieur au nombre total de processus qui est choisi (les processus supplémentaires n'effectueront aucun calcul et quitteront de suite).
+
+Cette éclatement de la grille de départ se fait simplement par les fonctions MPI \texttt{scatterv} et \texttt{gatherv}. Cependant il se pose alors le problème du nombre de cellules vivantes sur les bords d'un bloc, qui n'est connu que par un processus tiers a priori. Des communications sont donc nécessaires entre les processus, en pratique les blocs voisins s'envoient mutuellement leur lignes/colonnes sur les bordures et les stockent dans des cellules fantômes, réparties autour de leur grille locale. Pour cela ce sont d'abord les lignes qui sont échangées ne contenant que les cellules réelles, puis ensuite les colonnes incluant les cellules fantômes supplémentaires. Cela permet d'une part de diminuer le nombre de communications car les éléments diagonaux sont ainsi obtenus par les voisins de droite et gauche, d'autre part d'améliorer les performances mémoire car la grille est \emph{column major} et il est donc plus intéressant d'échanger un plus grand nombre de données (incluant alors les fantômes) par colonne que par ligne.
+
+L'unique version implémentée se contente de communications de base, toutefois deux autres versions sont envisagées : une version avec communications asynchrones et une autre avec communications persistantes. Dans les deux cas, le but est de recouvrir les communications par les calculs : pendant que les cellules de bordures sont échangées, il est possible de calculer le prochain état des cellules internes à la grille locale. Remarquons que dans ce cas d'implémentation, contrairement aux deux versions précédentes, aucune synchronisation entre les processus est apparente : les envois/réceptions (ou dans le cas asynchrone, les attentes de terminaisons des envois/réceptions) sont bloquants et par conséquent empêchent toute avance d'un processus sur l'autre.

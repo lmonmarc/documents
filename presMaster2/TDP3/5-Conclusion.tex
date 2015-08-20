@@ -1,0 +1,4 @@
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Nous regrettons les résultats du second \emph{benchmark} que nous n'arrivons pas à expliquer. Plusieurs pistes sont envisageables concernant les raisons de ce résultat : l'utilisation abusive d'envois asynchrones de \emph{buffers} pour les blocs de la matrice $B$ en avance plutôt que l'utilisation d'une réécriture directe de \emph{buffer} par \verb!MPI_Sendrecv_replace!, ou bien un problème lié à la non utilisation des n\oe uds manquants sur PlaFRIM lors de l'exécution des tests. Les résultats mathématiques sont toutefois corrects, et les \emph{speedups} pour un nombre de processus allant jusqu'à $9$ sont raisonnables par rapport à nos attentes, ce qui est donc une réussite partielle du projet.

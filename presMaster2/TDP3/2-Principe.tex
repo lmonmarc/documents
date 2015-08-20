@@ -1,0 +1,39 @@
+\section{Implémentation de l'algorithme}
+
+L'algorithme de Fox effectue la multiplication de deux matrices carrées ditribuées en blocks carrés de tailles égales sur plusieurs processus. Cet ensemble de processus forme une grille, de taille carrée $N$ qui divise la taille de la matrice globale. L'objectif de l'implémentation était de réaliser la distribution des matrices globales -- $A$ et $B$, importées depuis des fichiers -- sur plusieurs processus, le calcul des résultats locaux, puis la recomposition du résultat global. Quelques spécificités propres à l'utilsation de MPI sont abordées dans la dernière sous-section.
+
+\subsection{Algorithme de Fox}
+
+Nous sommes dans le cas d'une grille carrée de processus de taille $N$. Chaque processeur a à sa charge le calcul du morceau correspondant au découpage de $C = A\times B$ en un ensemble de blocs carrés de taille $n/N$, dont les positions sont calquées sur celles des processus -- par exemple le processus $(0,0)$ en haut à gauche de la grille contient le bloc $(0,0)$ en haut à gauche dans la matrice globale.
+
+L'algorithme se déroule alors en $N$ étapes, chacune correspondant à la multiplication de deux blocs différents, contribuant au résultat. \`A l'étape $k$, chaque processus $(i,j)$ calcule ainsi : $C_{(i,j)} = C_{(i,j)} + A_{(i,(i+k)\%N)} \times B_{((i+k)\%N,j)}$.
+
+Avant le passage à l'étape suivante chaque processus $(i,j)$ effectuera les opérations de communication suivantes : 
+\begin{itemize}
+\item \emph{réception} du bloc $B_{((i+k+1)\%N,j)}$, i. e. le bloc B de la même colonne, la ligne en dessous ;
+\item \emph{envoi} du bloc  $B_{((i+k-1)\%N,j)}$, i. e. le bloc B de la même colonne, la ligne au dessus.
+\end{itemize}
+
+Enfin à chaque étape, il se produira $N$ \emph{broadcasts} -- un sur chaque ligne -- pour diffuser les blocs de $A$ nécessaires au calcul. Sur une ligne $i$, c'est le processus $(i,j)$ détenant le bloc $A_{(i,j)}$ tel que $j = (i+k)\%N$ qui effectuera le \emph{broadcast}. Précisons que tous ces opérations s'effectuent avant la multiplication, dès l'entrée dans l'étape afin que chaque processus ait les blocs nécessaires initialisés.
+
+\subsection{Fonctionnement global du programme}
+
+Le pogramme se résume en plusieurs étapes successives :
+\begin{enumerate}
+\item détermination du nombre de processus utilisables pour le calcul (il faut que ce nombre soit un carré parfait, au besoin en réduisant l'ensemble des processus utilisables) ;
+\item création du communicateur lié à la grille des processus utilisés, de taille $N$ ;
+\item détermination de la position de chaque processus dans la grille ;
+\item création des communicateurs par ligne afin de réaliser les \emph{broadcasts} ;
+\item importation/création des matrices globales, uniquement dans le processus racine (de rang $0$) ;
+\item distribution par la racine des blocs de $A$ et $B$ à tous les processus ;
+\item application de l'algorithme de Fox par tous les processus et donc calcul des résultats locaux ;
+\item recomposition du résultat global (à partir de l'ensemble des blocs $C_{(i,j)}$ locaux) par la racine.
+\end{enumerate}
+
+\subsection{Utilisation de MPI pour la multiplication}
+
+MPI est utilisé pour l'envoi et la réception des blocs de $B$, ainsi que pour les \emph{broadcasts} des blocs de $A$. Les \emph{broadcasts} sont dans notre cas bloquants alors que les envois/réceptions pour $B$ sont effectués de manière non-bloquante. 
+
+En effet comme tous les processus d'une même ligne doivent contenir le même bloc de A au même moment, il est plus compliqué de mettre en \oe uvre un envoi en avance de ces blocs, notamment parce qu'un envoi est nécessaire dès le début de la première étape. Cela est toutefois faisable, et pourrait constituer une voie d'amélioration, en permettant le recouvrement des \emph{broadcast} autres que ceux de la première étape par le calcul, mais en obligeant à allouer dans chaque processus de la mémoire supplémentaire contenant le prochain bloc de $A$. 
+
+En revanche $B$ se prête plus facilement à cette optimisation car chaque processus en utilise un bloc différent. Il est alors possible d'envoyer dès la première étape le bloc de $B$ au processus en ayant besoin à l'étape suivante. Et il est alors espéré que cet envoi sera recouvert par le temps de calcul (d'où l'envoi non-bloquant). Plutôt que d'utiliser, un \texttt{MPI\_Sendrecv\_replace}, l'implémentation de l'algorithme utilise deux buffers (un pour le $B_{(i,j)}$ courant, et l'autre pour celui de la prochaine étape) qui sont remplis/échangés grâce à des \texttt{MPI\_Isend/recv}.

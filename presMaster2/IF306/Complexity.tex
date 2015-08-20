@@ -1,0 +1,25 @@
+\begin{frame}{Complexity : $O(n+k)$}
+            \begin{algorithmic}
+                \footnotesize
+                \For{$i\gets 0$ to $k$}\Comment{\textcolor{red}{initialize dummy intervals : $O(k)$}}
+                    \State\Call{right}{$I_{-i}$} $\gets -i$
+                    \State\Call{left}{$I_{-i}$} $\gets -i-1$
+                    \State\Call{color}{$I_{-i}$} $\gets k-i$
+                    \State create a singleton set containing $I_{-i}$
+                \EndFor
+                \For{$i\gets 1$ to $n$}\Comment{\textcolor{red}{setup adjacent, and the sets : $O(n)$}}
+                    \State\Call{adjacent}{$I_{i}$}$\gets$\Call{max}{j; \Call{right}{$I_{j}$}$\leq$\Call{left}{$I_{i}$}}
+                    \State create a singleton set containing $I_{i}$
+                \EndFor
+                \For{$i\gets 1$ to $n$}\Comment{\textcolor{red}{main loop : $O(n)$}}
+                    \State $I_{j}\gets$\Call{find}{\Call{adjacent}{$I_{i}$}}
+                    \If{$j=-k$}
+                        \State\Call{color}{$I_{i}$}$\gets 0$
+                        \State\Call{union}{$I_{i}$,\Call{find}{$I_{i-1}$}}
+                    \Else
+                        \State\Call{color}{$I_{i}$}$\gets$\Call{color}{$I_{j}$}
+                        \State\Call{union}{$I_{j}$,\Call{find}{$I_{j-1}$}}\Comment{\textcolor{red}{union done in constant time}}
+                    \EndIf
+                \EndFor
+            \end{algorithmic}
+\end{frame}

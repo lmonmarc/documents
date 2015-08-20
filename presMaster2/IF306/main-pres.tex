@@ -1,0 +1,330 @@
+\documentclass[10pt, compress]{beamer}
+
+\usetheme{m}
+
+%\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage{minted}
+\usepackage{color}
+%\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{fixltx2e}
+\usepackage{algpseudocode}
+
+%\usetikzlibrary{external}
+\usetikzlibrary{patterns}
+
+
+
+%\tikzexternalize
+
+\usemintedstyle{trac}
+
+\MakeRobust{\Call}
+
+\title{IF306 : Article Presentation}
+\subtitle{On the k-coloring of intervals\\Martin C. Carlisle, Errol L. Lloyd}
+\date{\today}
+\author{Alexandre Honorat, Elouan Keryell-Even}
+\institute{Enseirb-Matmeca}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\begin{frame}{Article topic}
+
+\begin{block}{Problem}
+\begin{itemize}
+\item[$\bullet$]Coloring intervals
+\item[$\bullet$]Different colors for intersecting intervals
+\item[$\bullet$]$\mathnormal{P}$: Given the number of colors, trying to maximize the number of colored interval.
+\end{itemize}
+\end{block}
+\begin{overlayarea}{\textwidth}{\textheight}
+
+\only<2>{
+\begin{block}{Example}
+\begin{tikzpicture}[scale=0.9]
+\draw (-1,0) -- (11,0) ;
+\foreach \x in {0,1,3}
+    {\draw (\x,-0.25) -- (\x, 0.25);
+    \draw (\x,-0.25) node[below]{$\x$};}
+\draw (2,0.25) node[above]{$I1$};
+\fill [pattern=north west lines, pattern color=blue] (1,-0.25) rectangle (3,0.25);
+\draw (-1,1) -- (11,1) ;
+\foreach \x in {0,4,7}
+    {\draw (\x,0.75) -- (\x, 1.25);
+    \draw (\x,0.75) node[below]{$\x$};}
+\draw (5.5,1.25) node[above]{$I2$};
+\fill [pattern=north west lines, pattern color=red] (4,0.75) rectangle (7,1.25);
+\draw (-1,2) -- (11,2) ;
+\foreach \x in {0,6,10}
+    {\draw (\x,1.75) -- (\x, 2.25);
+    \draw (\x,1.75) node[below]{$\x$};}
+\draw (8,2.25) node[above]{$I3$};
+\fill [pattern=north east lines, pattern color=green] (6,1.75) rectangle (10,2.25);
+\end{tikzpicture}
+\end{block}
+}
+
+\only<3>{
+\begin{block}{Example}
+\begin{tikzpicture}[scale=0.9]
+\draw (-1,0) -- (11,0) ;
+\foreach \x in {0,1,3,6,10}
+    {\draw (\x,-0.25) -- (\x, 0.25);
+    \draw (\x,-0.25) node[below]{$\x$};}
+\draw (2,0.25) node[above]{$I1$};
+\fill [pattern=north west lines, pattern color=blue] (1,-0.25) rectangle (3,0.25);
+\draw (8,-0.25) node[above]{$I3$};
+\fill [pattern=north east lines, pattern color=blue] (6,-0.25) rectangle (10,0.25);
+\draw (-1,1) -- (11,1) ;
+\foreach \x in {0,4,7}
+    {\draw (\x,0.75) -- (\x, 1.25);
+    \draw (\x,0.75) node[below]{$\x$};}
+\draw (5.5,1.25) node[above]{$I2$};
+\fill [pattern=north west lines, pattern color=red] (4,0.75) rectangle (7,1.25);
+\end{tikzpicture}
+\end{block}
+}
+\end{overlayarea}
+
+\end{frame}
+
+\begin{frame}{Problem modelisation}
+
+\begin{block}{Graph modelisation ...}
+Undirected graph:
+\begin{itemize}
+\item[$\bullet$] each vertex is an interval;
+\item[$\bullet$] each edge is the intersection between two intervals (the two vertices of this edge).
+\end{itemize}
+\end{block}
+\pause
+\begin{block}{... or intervals modelisation !}<2->
+\begin{itemize}
+\item[$\bullet$] An interval is defined by two endpoints: left and right.
+\item[$\bullet$] Intervals are in a set, sorted by endpoints.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}{More about graphs}
+
+\begin{block}{Chordal graphs}
+\alert{Def:} A chordal graph is a graph in which every cycle of four or more vertices have an extra edge connecting two node of the cycle.
+\end{block}
+
+
+\begin{block}{Interval graphs are chordal graphs}
+
+\only<2>{
+\begin{tabular}{lcr}
+\begin{tikzpicture}
+\def \margin {12}
+\def \radius {1.4cm}
+\def \n {4}
+\foreach \s in {1,...,\n}
+  {\node[draw, circle] at ({360/\n * (\s - 1)}:\radius) {$\s$};
+   \draw ({360/\n * (\s - 1)+\margin}:\radius) 
+    arc ({360/\n * (\s - 1)+\margin}:{360/\n * (\s)-\margin}:\radius);}
+\end{tikzpicture}
+&
+\vspace{-2cm}
+\begin{tikzpicture}
+\draw[<->, red, very thick] (-0.5,1) -- (0.5,1);
+\draw[white, ultra thin] (0,-0.5) -- (0,1);
+\end{tikzpicture}
+&
+\begin{tikzpicture}
+\foreach \x in {0,1.5,2,3.5}
+    {\draw (\x,-0.2) -- (\x, 0.2);}
+\draw (0.75,0) node[below]{$I1$};
+\draw[thick] (0,0) -- (1.5,0);
+\draw (2.75,0) node[below]{$I3$};
+\draw (2,0) -- (3.5,0);
+
+\foreach \x in {1,2.5,3,4.5}
+    {\draw (\x,0.8) -- (\x, 1.2);}
+\draw (1.75,1) node[above]{$I2$};
+\draw (1,1) -- (2.5,1);
+\draw (3.75,1) node[above]{$I4$};
+\draw[thick] (3,1) -- (4.5,1);
+
+\draw[<->,blue] (0.75,-0.6) to[out=290, in=290] (3.75,0.6);
+\end{tikzpicture}
+\end{tabular}
+}
+
+\only<3>{
+\begin{tabular}{lcr}
+\begin{tikzpicture}
+\def \margin {12}
+\def \radius {1.4cm}
+\def \n {4}
+\foreach \s in {1,...,\n}
+  {\node[draw, circle] at ({360/\n * (\s - 1)}:\radius) {$\s$};
+   \draw ({360/\n * (\s - 1)+\margin}:\radius) 
+    arc ({360/\n * (\s - 1)+\margin}:{360/\n * (\s)-\margin}:\radius);}
+\draw[<->,blue] (-1.1,0) -- (1.1,0);
+\end{tikzpicture}
+&
+\vspace{-2cm}
+\begin{tikzpicture}
+\draw[<->, green, very thick] (-0.5,1) -- (0.5,1);
+\draw[white, ultra thin] (0,-0.5) -- (0,1);
+\end{tikzpicture}
+&
+\begin{tikzpicture}
+\foreach \x in {0,4}
+    {\draw (\x,-0.2) -- (\x, 0.2);}
+\draw (2,0) node[below]{$I1$};
+\draw (0,0) -- (4,0);
+
+\foreach \x in {2,3.5}
+    {\draw (\x,-1.2) -- (\x, -0.8);}
+\draw (2.75,-1) node[below]{$I3$};
+\draw (2,-1) -- (3.5,-1);
+
+\foreach \x in {1,2.5,3,4.5}
+    {\draw (\x,0.8) -- (\x, 1.2);}
+\draw (1.75,1) node[above]{$I2$};
+\draw (1,1) -- (2.5,1);
+\draw (3.75,1) node[above]{$I4$};
+\draw (3,1) -- (4.5,1);
+
+\end{tikzpicture}
+\end{tabular}
+}
+\end{block}
+
+\end{frame}
+
+
+
+\section{Related Work}
+
+\begin{frame}{Context}
+
+
+\begin{block}{Related NP-complete problems}
+Given an arbitrary graph $\mathnormal{G}$ and $\mathnormal{k}$ colors:
+\begin{itemize}
+\item[$\bullet$] is $\mathnormal{G}$ $\mathnormal{k}$-colorable ?
+\item[$\bullet$] find a maximal $\mathnormal{k}$-colorable subgraph of $\mathnormal{G}$
+\end{itemize}
+\end{block}
+\pause
+\begin{block}{Related $\mathnormal{O(n + e)}$ problems, assuming that $\mathnormal{G}$ is \emph{chordal}}<2->
+$\mathnormal{n}$ is the number of vertices, $\mathnormal{e}$ the number of edges.
+\begin{itemize}
+\item[$\bullet$] is $\mathnormal{G}$ $\mathnormal{k}$-colorable ?
+\item[$\bullet$] find a maximal $\mathnormal{k}$-colorable subgraph of $G$
+\end{itemize}
+\end{block}
+\pause
+\begin{block}{Article's problem}<3->
+\begin{itemize}
+\item[$\bullet$] $\mathnormal{O(n + e)}$ with previous algorithm;
+\item[$\bullet$] $\mathnormal{O(n~log~k)}$ if intervals are presorted by endpoints.
+\end{itemize} 
+\end{block}
+\end{frame}
+
+
+\include{Algorithm}
+\include{Example}
+\include{Complexity}
+\include{Weighted}
+
+\begin{frame}{Union/Find algorithm}
+
+\begin{block}{Complexity in the case of preprocessed union tree}
+\begin{itemize}
+\item[$\bullet$] $\mathnormal{m}$: union and find intermixed operations
+\item[$\bullet$] $\mathnormal{n}$: number of elements in the tree 
+\end{itemize}
+$\Rightarrow \mathnormal{O(m+n)}$ in time
+
+\end{block}
+
+\only<2>{
+\begin{exampleblock}{Case of interval sets}
+Union tree is a simple path.
+\begin{tikzpicture}
+\node[draw, circle, red] at (0,0) {$I_{ N}$};
+\draw[dashed,->] (0.5,0) -- (2,0);
+\node[draw, circle, red] at (2.5,0) {$I_{ 1}$};
+\draw[->] (3,0) -- (3.5,0);
+\node[draw, circle, red] at (4,0) {$I_{ 0}$};
+\draw[dashed,->] (4.5,0) -- (6,0);
+\node[draw, circle, red] at (6.5,0) {$I_{-k}$};
+
+\end{tikzpicture}
+\end{exampleblock}
+
+}
+
+\only<3>{
+\begin{exampleblock}{Case of interval sets}
+Union tree is a simple path.
+\begin{tikzpicture}
+\node[draw, circle, red] at (0,0) {$I_{ N}$};
+\draw[dashed,->] (0.5,0) -- (2,0);
+\node[draw, circle, blue] at (2.5,0) {$I_{ 1}$};
+\draw[->] (3,0) -- (3.5,0);
+\node[draw, circle, red] at (4,0) {$I_{ 0}$};
+\draw[dashed,->] (4.5,0) -- (6,0);
+\node[draw, circle, red] at (6.5,0) {$I_{-k}$};
+
+\end{tikzpicture}
+\end{exampleblock}
+
+}
+
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Applications}
+
+\begin{block}{Register allocation}<1->
+The goal is to minimize the number of variable load/store.\\ 
+\textcolor{blue}{Variable use times} correspond to \textcolor{blue}{intervals}.\\
+\textcolor{green}{Registers} correspond to \textcolor{green}{colors}.
+\end{block}
+
+\begin{block}{Job scheduling}<2->
+You want to assign tasks to some identical \textcolor{green}{processors}. Each \textcolor{blue}{task} has a start time and an end time, plus a \textcolor{orange}{value}. The goal is to assign a set with the greatest task's value total.
+\end{block}
+
+\begin{block}{Wavelength assignment}<3->
+The goal is to assign the maximum number of \textcolor{blue}{communication requests} to the different \textcolor{green}{wavelengths}.
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}{Conclusion}
+
+\begin{block}{More about the article}
+This article is twenty years old, but better algorithms do not exist\ldots
+\end{block}
+
+\begin{block}{Question}
+Is it possible to have an even better complexity ?
+\end{block}
+
+\end{frame}
+
+\plain{}{Questions}
+
+\end{document}
+

@@ -1,0 +1,20 @@
+\section{Validation}
+
+La validation s'est faite en comparant, sur des données d'entrée aléatoires, les résultats obtenus avec nos fonctions par rapport à ceux obtenus avec des implémentations déjà existantes (\textsf{CBLAS}/\textsf{LAPACKE}, \textsf{MKL}). Cela n'est pas une solution idéale puisque par défaut il ne faut pas supposer que les autres implémentations sont valides, mais nous avons fait ce choix par simplicité.
+
+Différents binaires de test sont créés lors de la compilation, un pour chaque catégorie de test.
+
+\subsection{Validation des fonctions auxiliaires}
+
+Les fonctions testées comprennent l'affichage ainsi que la répartition puis la réorganisation des matrices. La vérification de l'affichage est purement visuelle. En revanche pour la répartition des matrices en les divers processus, une copie de la matrice répartie est enregistrée, afin de la comparer au résultat de la réorganisation. Des \emph{asserts} préviennent de toute erreur.
+
+\subsection{Validation des BLAS}
+
+Une grande partie du code a été réutilisé directement depuis le TDP1, le protocole de validation est donc le même. Le seul ajout concerne \texttt{trsm()}. La validation est cependant identique : il s'agit de la comparaison du résultat avec celui d'une implémentation déjà existante, sur des entrées aléatoires, et dans les trois cas évoqués dans la section précédente.
+
+\subsection{Validation de LAPACK}
+
+La validation des fonctions de LAPACK implémentées (différentes versions de \texttt{getrf()} et \texttt{gesv()}) a été très fastidieuse et a entraîné une partie du retard dans le rendu de ce projet. D'une part une première version des tests était fausse, d'autre part nous avons d'abord cru bon de suivre la même méthodologie que pour les tests BLAS et de comparer directement les résultats à ceux d'une autre implémentation. Or cela n'est pas aisé à cause de l'éventuel pivotage que vont effectuer les librairies existantes. Cette optimisation a pour objectif de minimiser les pertes de précision en choisissant méticuleusement, à chaque itération, l'élément diagonal le plus grand. En effet, cet élément va être utilisé pour diviser la colonne, et le fait qu'il soit trop petit relativement aux éléments de la colonne entraîne une explosion des éléments de cette même colonne, causant par là-même une perte de précision dans la partie restant de la matrice, qui va réutiliser ces données.
+
+Par conséquent c'est la méthode suivante qui est appliquée pour \texttt{getrf/getf2()} : la factorisation est appliquée sur une matrice aléatoire (de taille quelconque, y compris la taille des blocs, ce qui nous a aussi inutilement retardé) puis le produit de la factorisation est comparée à la matrice originale. Pour \texttt{gesv} il s'agit d'un raisonnement similaire : une matrice $A$ et $B$ sont générées aléatoires, le système $Ax = B$ est résolu puis la multiplication de $A$ par $x$ est comparée à $B$.
+

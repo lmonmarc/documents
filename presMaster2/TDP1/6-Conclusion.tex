@@ -1,0 +1,10 @@
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Nous avons donc implémenté et étudié deux routines BLAS (\texttt{dot} et \texttt{dgemm}) et mis en avant certains des paramètres qui influent sur les performances, comme la taille des données par exemple.
+
+Pour le \texttt{ddot}, nous avons mis en avant une optimisation dans le cas particulier où les vecteurs étaient contigus en mémoire : nous favorisons la localité spatiale et évitons des multiplications sur les entiers. Le comportement de la routine face au remplissage de cache a aussi été abordé.
+
+Pour \texttt{dgemm}, nous avons tenté d'optimiser l'ordre des opérations pour avoir les meilleures performances possibles. Dans un premier temps nous avons vérifié que la localité spatiale des données était un facteur important pour les performances, et qu'il était nécessaire de parcourir les éléments des matrices dans l'ordre ou ils apparaissent en mémoire. Ensuite nous avons changé l'ordre des opérations et mis en avant l'importance de réutiliser les données mises en cache avant qu'elles ne soient écrasées en utilisant un produit par bloc. Enfin, nous avons observé que le produit par bloc se parallélise bien pourvu que les matrices soient assez grandes.
+
+Pour compléter nos expériences, il faudrait étudier le comportement de nos algorithmes si nous vidions le cache à chaque fois. En effet, dans nos expériences, nous travaillons toujours sur les mêmes données, qui peuvent alors rester en cache d'une exécution à l'autre. Pour cela, il suffirait de vider les caches en les remplissant d'autres données entre chaque calcul. En faisant cela, il est possible que les performances soient moindres pour le \texttt{ddot} qui n'utilise qu'une seule fois les données. Pour le \texttt{dgemm} qui réutilise les données, nous pouvons nous attendre à des performances comparables à celles mesurées pour de grandes matrices.

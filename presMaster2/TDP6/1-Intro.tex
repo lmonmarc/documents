@@ -1,0 +1,4 @@
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Le jeu de la vie est une simulation de l'évolution de cellules (réparties sur une grille de deux dimensions) au cours du temps, de sorte que celles-ci peuvent mourir d'isolement ou d'étouffement selon le nombre de cellules voisines encore en vie, ou continuer à vivre voire même naître lorsque les cellules voisines ne sont ni trop, ni trop peu nombreuses. Le fait que l'évolution de chaque cellule ne dépend que des voisines rend l'implémentation d'un tel jeu naturellement adaptée à une version parallèle. Nous étudions ici les implémentations possibles sur un seul c\oe ur pour les versions utilisant OpenMP et pthread, et sur plusieurs coeurs pour les versions utilisant MPI.

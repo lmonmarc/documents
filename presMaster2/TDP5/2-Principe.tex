@@ -1,0 +1,157 @@
+\newpage
+\section{Principe}
+
+Cette première section rappelle le déroulement de la factorisation LU, et les détails liés à notre implémentation.
+
+\subsection{Factorisation LU}
+
+La factorisation LU d'une matrice consiste à décomposer une matrice en le produit de deux matrices ; une matrice $\mathbf{L}$ (pour \emph{lower}), triangulaire inférieure et de diagonale unitaire, ainsi qu'une matrice $\mathbf{U}$  (pour \emph{upper}), triangulaire supérieure.
+
+Dans le cadre de notre résolution de système de type $\mathbf{Ax}=\mathbf{b}$, il est intéressant d'appliquer la factorisation $\mathbf{A}=\mathbf{LU}$. En effet, cela permet de décomposer la résolution en deux étapes plus simple (car triangulaires) : $\mathbf{Ly}=\mathbf{b}$, puis $\mathbf{Ux}=\mathbf{y}$.
+
+\subsubsection{Version séquentielle basique}
+
+Dans un premier temps, nous avons implémenté une version basique de la factorisation LU, à savoir une version séquentielle non-\emph{blockée}.
+
+En indiçant à partir de 0, les formules pour calculer les éléments des deux matrices sont les suivantes :
+\begin{eqnarray*}
+\mathbf{l}_{i,j} = \mathbf{b}_{i,j} - \sum\limits_{k=0}^{j-1}\mathbf{l}_{i,k}\mathbf{u}_{k,j}\\
+\mathbf{u}_{i,j} = \frac{\mathbf{b}_{i,j}-\sum\limits_{k=0}^{i-1}\mathbf{l}_{i,k}\mathbf{u}_{k,j}}{\mathbf{l}_{i,i}}
+\end{eqnarray*}
+
+$\mathbf{l}_{i,k}$ est utilisé dans le calcul de $\{\mathbf{l}_{i,j}\}_{j>k}$ et $\{\mathbf{u}_{i,j}\}_{j>i}$, où il est dans les deux cas multiplié par $\mathbf{u}_{k,j}$. De même, $\mathbf{u}_{k,j}$ est utilisé dans le calcul de $\{\mathbf{l}_{i,j}\}_{i>j}$ et $\{\mathbf{u}_{i,j}\}_{i>k}$, où il est dans les deux cas multiplié par $\mathbf{l}_{i,k}$.
+
+L'un des avantages de la décomposition LU est qu'elle peut être calculée en place puisque les deux matrices résultat n'empiètent pas l'une sur l'autre ($\mathbf{U}$ est unitaire).
+
+En utilisant ce que l'on a vu ci dessus, on peut obtenir l'algorithme suivant :
+
+\begin{algorithm}
+\caption*{\texttt{getf2()}}
+\begin{algorithmic}
+\For{$k = 0\dots n-1$}
+    \For{$j=k+1\dots n-1$}\Comment{implémention : appel à \texttt{scal()}}
+        \State$\mathbf{a}_{k,j}\gets \frac{\mathbf{a}_{k,j}}{\mathbf{a}_{k,k}}$
+    \EndFor
+    \For{$j=k+1\dots n-1$}\Comment{\texttt{implémentation : appel à ger()}}
+        \For{$i=k+1\dots n-1$}
+            \State$\mathbf{a}_{i,j}\gets \mathbf{a}_{i,j} - \mathbf{a}_{i,k}\times \mathbf{a}_{k,j}$
+        \EndFor
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+À noter que nous avons pris pour convention un stockage des matrices en colonne, d'où l'ordonnancement des deux dernières boucles.
+
+\subsubsection{Version séquentielle par bloc}
+
+Afin d'optimiser la réutilisation des données, il est intéressant d'utiliser une variante par blocs de notre algorithme. Cette variante utilise la version de base pour le calcul des blocs diagonaux.
+
+On note $NT$ le nombre de blocs par ligne/colonne.
+
+\begin{algorithm}
+\caption*{\texttt{getrf()}}
+\begin{algorithmic}
+\For{$k = 0\dots NT-1$}
+    \State facto LU de $\mathbf{A}_{k,k}$\Comment{implémentation : appel à \texttt{getf2()}}
+    \For{$j=k+1\dots N_{b}-1$}
+        \State résoudre $\mathbf{A}_{k,k}\mathbf{A}_{k,j} = \mathbf{A}_{k,j}$\Comment{implémentation : appel à \texttt{trsm()}}
+    \EndFor
+    \For{$i=k+1\dots N_{b}-1$}
+            \State résoudre $\mathbf{A}_{i,k}\mathbf{A}_{k,k} = \mathbf{A}_{i,k}$\Comment{implémentation : appel à \texttt{trsm()}}
+    \EndFor
+    \For{$j=k+1\dots NT-1$}
+        \For{$i=k+1\dots NT-1$}
+            \State$\mathbf{A}_{i,j}\gets \mathbf{A}_{i,j} - \mathbf{A}_{i,k}\times \mathbf{A}_{k,j}$\Comment{implémentation : appel à \texttt{gemm()}}
+        \EndFor
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Version multi-cœur}
+
+La version multi-cœur est très proche de la version par bloc. Nous considérons que la matrice à factoriser est répartie (par colonne de largeur un multiple de la taille d'un bloc) dans les processus par une numérotation en serpentin, par exemple $0 1 2 2 1 0 0 1$ dans le cas de 3 processus avec au total 8 blocs colonnes (les processus $0$ et $1$ en ayant $3$, $2$ en ayant $1$). Chaque processus doit alors avoir connaissance du dernier bloc factorisé pour faire les appels à \texttt{trsm()}, ainsi que de toute la colonne se situant en dessous de celui-ci pour faire les appels à \texttt{gemm()}. Cette connaissance est assurée par des \emph{broadcasts}
+
+Des fonctions auxiliaires ont été implémentées dans le dossier \texttt{util/} afin d'effectuer la répartition de la matrice initiale, ainsi que sa recomposition. Nous pouvons notamment mentionner les routines permettant de savoir quel processus possède le bloc factorisé à l'étape $k$ (\texttt{dest()}) utilisé comme racine lors des \emph{broadcasts}, ou encore permettant de savoir si la colonne $j$ est locale ou non, et si oui en nous renvoyant l'indice local correspondant (\texttt{nb\_local()}.
+
+\begin{algorithm}
+\caption*{\texttt{p\_getrf()}}
+\begin{algorithmic}
+\For{$k = 0\dots NT-1$}
+    \State facto LU de $\mathbf{A}_{k,k}$\Comment{implémentation : \textbf{si local}, appel à \texttt{getf2()} puis \emph{broadcsat} à tous les processus}
+    \For{$j=k+1\dots N_{b}-1$}
+        \State résoudre $\mathbf{A}_{k,k}\mathbf{A}_{k,j} = \mathbf{A}_{k,j}$\Comment{implémentation : \textbf{si local}, appel à \texttt{trsm()} puis \emph{broadcsat} à tous les processus}
+    \EndFor
+    \For{$i=k+1\dots N_{b}-1$}
+            \State résoudre $\mathbf{A}_{i,k}\mathbf{A}_{k,k} = \mathbf{A}_{i,k}$\Comment{implémentation : \textbf{si local}, appel à \texttt{trsm()}}
+    \EndFor
+    \For{$j=k+1\dots NT-1$}
+        \For{$i=k+1\dots NT-1$}
+            \State$\mathbf{A}_{i,j}\gets \mathbf{A}_{i,j} - \mathbf{A}_{i,k}\times \mathbf{A}_{k,j}$\Comment{implémentation : \textbf{si local}, appel à \texttt{gemm()}}
+        \EndFor
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Résolution de systèmes triangulaires}
+
+Concernant la résolution de systèmes triangulaires, nous nous sommes limité aux deux seuls cas utiles dans le cadre de ce TDP :
+\begin{itemize}
+\item[$\bullet$]$\mathbf{xA=b}$, avec $\mathbf{A}$ triangulaire supérieure;
+\item[$\bullet$]$\mathbf{Ax=b}$, avec $\mathbf{A}$ triangulaire inférieure.
+\end{itemize}
+Toutefois, nous avons pris en compte les cas où $\mathbf{x}$ et $\mathbf{b}$ ne seraient pas carré. En effet, dans la Factorisation LU par bloc, si la longueur de $\mathbf{A}$ n'est pas divisible par la taille des blocs, on obtient des blocs partiels sur l'extrémité droite et l'extrémité inférieure. Or l'algorithme nécessite d'appliquer la fonction \texttt{trsm()} à ces blocs.
+
+Dans la suite, on note $M$ (respectivement $N$) le nombre de lignes (respectivement colonnes) de $\mathbf{x}$ et $\mathbf{b}$. De plus, le résultat $\mathbf{x}$ est calculé en place dans $\mathbf{b}$.
+
+\subsubsection{Version séquentielle basique}
+
+\large Cas $\mathbf{xA=b}$\\
+
+\begin{equation*}
+\mathbf{x}_{i,j} = \frac{\mathbf{b}_{i,j} - \sum\limits_{k=0}^{j-1}\mathbf{x}_{i,k}\mathbf{a}_{k,j}}{\mathbf{a}_{j,j}}
+\end{equation*}
+
+$\mathbf{x}_{i,k}$ est donc utilisé dans le calcul de $\{\mathbf{x}_{i,j}\}_{j>k}$, multiplié par $\mathbf{u}_{k,j}$. Cela correspond aux éléments suivants de $\mathbf{x}$ sur la même ligne. On peut donc en déduire un algorithme.
+
+\begin{algorithm}
+\caption*{\texttt{trsm()}}
+\begin{algorithmic}
+    \For{$k=0\dots$\Call{min}{$M,N$}}
+        \For{$i=0\dots M$}\Comment{implémentation : appel à \texttt{dscal()}}
+            \State$\mathbf{x}_{i,k}\gets\frac{\mathbf{x}_{i,k}}{\mathbf{a}_{k,k}}$
+        \EndFor
+        \For{$i=0\dots M$}\Comment{implémentation : appel à \texttt{dger()}}
+            \For{$j=k+1\dots N$}
+                \State$\mathbf{x}_{i,j}\gets\mathbf{x}_{i,j}-\mathbf{x}_{i,k}\mathbf{a}_{k,j}$
+            \EndFor
+        \EndFor
+    \EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\large Cas $\mathbf{Ax=b}$\\
+
+On obtient de la même manière un algorithme pour le second cas. Cette fois-ci, une inconnue donnée est réutilisée par les inconnues suivantes de la même colonne.
+
+\begin{algorithm}
+\caption*{\texttt{trsm()}}
+\begin{algorithmic}
+    \For{$k=0\dots$\Call{min}{$M,N$}}
+        \For{$j=0\dots N$}\Comment{implémentation : appel à \texttt{dscal()}}
+            \State$\mathbf{x}_{k,j}\gets\frac{\mathbf{x}_{k,j}}{\mathbf{a}_{k,k}}$
+        \EndFor
+        \For{$j=0\dots N$}\Comment{implémentation : appel à \texttt{dger()}}
+            \For{$i=k+1\dots M$}
+                \State$\mathbf{x}_{i,j}\gets\mathbf{x}_{i,j}-\mathbf{a}_{i,k}\mathbf{x}_{k,j}$
+            \EndFor
+        \EndFor
+    \EndFor
+\end{algorithmic}
+
+En troisième cas implémenté est nécessaire dans le cas du \texttt{trsm()}, le fonctionnement est similaire.
+
+\end{algorithm}

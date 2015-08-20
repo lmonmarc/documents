@@ -1,0 +1,63 @@
+\section{Améliorations et optimisations}
+
+Différentes améliorations étaient proposées dans le sujet pour augmenter les performances et la précision de la simulation. Nous avons mis en place des communications persistantes, et utilisé un \textbf{dt} variable.
+
+\subsection{Optimisation des communications}
+
+La version de base utilisait déjà des communications asynchrones pour envoyer et recevoir des données en même temps, mais l'envoi n'était pas recouvert par du calcul et la connexion était réinitialisée à chaque envoi. Utiliser les communications persistantes nous a permis d'économiser les temps de connexion à chaque transfert en gardant toujours le canal ouvert. La seconde optimisation que nous avons effectué est le recouvrement des communications par le calcul qui permet de rendre les communications transparentes en remplaçant les temps d'attente par du calcul.
+
+\subsubsection{Communications persistantes}
+
+Les communications persistantes permettent de maintenir un canal de communication ouvert afin de ne pas avoir à ré-établir la connexion à chaque envoi. De telles communications s'initialisent avec les fonctions \texttt{MPI\_Send/Recv\_init} qui associent définitivement une connexion représentée par un \texttt{MPI\_Request} et un buffer de réception/envoi. Il suffit alors de remplacer les appels à \texttt{MPI\_Isend/recv} par un appel à \texttt{MPI\_Start} sur la bonne connexion.
+
+Le double buffering pose cependant un problème. Les buffers d'envoi et de réception sont échangés entre 2 tour de boucles, il faut donc utiliser des connexions différentes. C'est pourquoi il nous a fallu ouvrir 4 connexions pour envoyer et recevoir dans chaque buffer. On échange les buffers de réception et d'envoi en choisissant les bonnes connexion
+
+Le code gérant les communications se présente sous la forme présentée en figure \ref{algo:persist}
+\begin{figure}
+\begin{minted}{c}
+[Allocation de b1 et b2]
+MPI_Request send_b1, send_b2, recv_b1, recv_b2;
+MPI_Send_init(b1, [...], rank+1, [...], &send_b1);
+MPI_Send_init(b2, [...], rank+1, [...], &send_b2);
+MPI_Recv_init(b1, [...], rank-1, [...], &recv_b1);
+MPI_Recv_init(b2, [...], rank-1, [...], &recv_b2);
+[Initialisation de b1 avec les particules locales]
+for(i=0; i<nb_proc-1; i++){
+    MPI_Request* recv, send;
+    if(i%2){
+        send = &send_b1;
+        recv = &recv_b2;
+        particles_current = b1;
+    } else {
+        send = &send_b2;
+        recv = &recv_b1;
+        particles_current = b2;
+    }
+    MPI_Start(send_request);
+    MPI_Start(recv_request);
+    [Calcul sur particles_current]
+    MPI_Request requests[] = {*send_request, *recv_request};
+    MPI_Waitall(2, requests, [...]);
+}
+\end{minted}
+\caption{Communications persistantes}
+\label{algo:persist}
+\end{figure}
+
+\subsubsection{Recouvrement des communications}
+
+Le recouvrement de données consiste à effectuer des calculs pendant les communications. Placer les calculs entre \texttt{MPI\_Start} et \texttt{MPI\_Waitall} permet de les effectuer sans attendre que la communication ne termine. Pour que cela fonctionne, il faut s'assurer que les buffers d'envoi et de réception ne soient pas modifiés. Ici, il est possible d'accéder au buffer d'envoi en lecture seule, dans la mesure où les particules distantes ne sont pas modifiées lors du calcul de la force.
+
+Le recouvrement des communications par du calcul devrait compenser le temps de latence de la communication.
+
+
+\subsection{\textbf{dt} variable}
+
+Avec la discrétisation, l'accélération est considérée constante sur la durée dt, ce qui mène à des erreurs d'approximation. Les erreurs sont d'autant plus importantes que dt est grand, que les particules sont proches et que la vitesse est importante.
+
+On souhaite avoir $dt$ tel que pour toute particule i $\|\delta \overrightarrow{p_i}\| < 0.1 \|\overrightarrow{p_i} - \overrightarrow{p_j}\|$ avec j la particule la plus proche de i. On approxime l'inéquation avec l'inégalité triangulaire et on cherche dt tel que $\|\overrightarrow{v_i}\|dt + |\overrightarrow{a_i}\|\frac{dt^2}{2} = 0.1 \|\overrightarrow{p_i} - \overrightarrow{p_j}\|$. On peut trouver $\|\overrightarrow{p_i} - \overrightarrow{p_j}\|$ lors du calcul de la force où l'on calcule déjà cette valeur. On résout ensuite l'équation du second degré en dt et on trouve un dt par particule. Le $dt$ à choisir est le minimum des $dt$ calculés pour chaque particule. On fait un minimum local au processus, puis une réduction pour trouver le minimum de tous les processus.
+
+A posteriori, la valeur de 0.1 nous a semblé encore trop grande dans la mesure ou certaines particules se comportant encore de façon étrange et semblaient ne pas respecter la loi de conservation de l'énergie. Choisir une valeur plus petite semble résoudre le problème, nous avons choisi 0.01. Un second problème lié a la visualisation est apparu: lorsque les particules étaient trop éloignées, le dt devenait trop grand et le mouvement perçu n'était plus fluide. C'est pourquoi nous avons décidé de rajouter un maximum sur le dt.
+
+La résolution de l'équation du second degré pour chaque particule nous parait un peu lourde, et nous pensons qu'il y a moyen de trouver quelle est la particule j sans résoudre cette équation, évitant ainsi des calculs de racine. Une piste serait de considérer que la particule j est celle pour qui le rapport $\frac{\|\delta \overrightarrow{p_i}\|}{\|\overrightarrow{p_i} - \overrightarrow{p_j}\|}$ est le plus important pour un dt fixé. On ne résout l'équation que pour cette particule et le rapport calculé (qui peut être mis au carré) est rapide à calculer.
+

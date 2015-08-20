@@ -1,0 +1,50 @@
+\section*{idées}
+
+
+
+\section*{blablabla}
+
+Le domaine est torique : les cellules fantômes du haut sont les voisines de celles du bas, etc etc...
+
+First Touch : pour pallier aux problèmes de NUMA, faire en sorte que le thread initialise lui-même les données qu'il va utiliser, afin qu'elles soient directement placées près de lui.
+
++ binding pour que le thread ne s'exécute que sur un coeur, afin que toutes les données qu'il va utilisées soient proches du coeur sur lequel il va s'utiliser.\\
+
+La version openmp n'est pas optimale parce qu'il n'est pas nécessaire d'avoir une barrière totale entre la boucle de calcul de voisins et la boucle de mises à jour. En effet, une cellule peut être mise à jour dès lors que le calcul du nombre de voisins à déjà été effectué sur les cellues voisines (il ne faut pas changer d'état avant sinon les cellules voisines feront un calcul en utilisant une information "venue du futur"!).
+
+Du coup il peut être intéressant de faire une version pthread pour éviter cette barrière globale.
+
+\section*{OpenMP}
+
+.Paralléliser 1 ou 2 boucles?
+->1 boucle : on distribue des colonnes aux threads. Moins d'overhead OpenMP vu que la distribution est plus rapide, mais par contre certains threads peuvent avoir plus de travail vu que le nombre de colonnes n'est pas forcément divisible par le nombre de threads.
+->2 boucles : Distribution plus équilibrée car le grain est plus fin (cellule). Toutefois, on peut avoir une légère perte de localité par rapport à la distribution par colonnes. De plus cette distribution demande plus d'overhead OpenMP.\\
+
+.Le travail des threads est-il équilibré?
+cf ci-dessus\\
+
+.Le caractère NUMA de la machine influe-t-il sur les performances?
+->Ça n'influe pas sur les performances si on utilise bien le cache. Sinon, alors oui ça impacte.
+->Pour limiter les NUMA, on peut utiliser le principe de First Touch :\\
+
+First Touch :
+1.Assigner chaque thread a un coeur
+2.Faire en sorte que le thread initialise les données qu'il a la charge de traiter.
+
+.Les unités de calculs entières sont utilisés en permannce et il n'y a pas de "trous" à combler, ce qui rend l'hyperthreading inutile.
+
+.Les différentes variables :
+
+**Calcul du nombre de voisins**
+>>>j : c'est le compteur du 1er niveau de boucle. Il est privé.
+>>>i : c'est le compteur du 2nd niveau de boucle. Il doit également être privé pour le bon fonctionnement de l'algorithme.
+>>>nbngb : Chaque thread écrit à un endroit différent du tableau, donc on a pas d'écritures concurrentes. On peut donc partager le tableau sans problème.
+>>>board : le tableau est accédé en lecture seule. Il peut être partagé sans se soucier des problèmes de concurrence.
+
+**Mise à jour des cellules**
+>>>i & j : pareil qu'au dessus.
+>>>Cette fois-ci, c'est board qui est accédé en écriture et nbngb en lecture. Comme les threads écrivent tous à des endroits différents dans board, on peut donc partager ces deux tableaux sans soucis de concurrence.
+
+.Intérêt des pavés : Chaque cellule a besoin d'accéder à ses voisins pour calculer son état à l'étape suivante. Il est donc intéressant de traiter les cellules par blocs plutôt que de manière unitaires, car grâce au cache on peut faire de la réutilisation de donées pour les cellules voisines. L'idée serait donc de découper le tableau en blocs contigus, et de distrivuer ces blocs entre les threads. On peut utiliser le Fist Touch pour avoir une meilleure localité des données entre le thread et ses blocs.
+
+\section*{pthread}

@@ -1,0 +1,12 @@
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Nous avons implémenté la simulation du nuage de particules de manière distribuée en utilisant la bibliothèque MPI et analysé les performances de cet algorithme.
+
+Ce qui ressort des benchmarks effectués, est que l'algorithme se parallélise bien car l'accélération obtenue sur une exécution se rapproche fortement du nombre de processeurs. Ce résultat n'est pas étonnant dans la mesure où les calculs (de complexité quadratique) recouvrent rapidement le temps des communications (qui sont de complexité linéaire). 
+
+Différentes techniques ont été mises en \oe uvre pour rendre les communications les plus transparentes possibles, comme la mise en place de communications persistantes et le recouvrement des communications par le calcul. Ces améliorations ont permis d'utiliser les capacités de calcul de manière aussi efficace que l'algorithme séquentiel.
+
+Une autre amélioration à été mise en place, en utilisant un dt variable pour une simulation plus précise. Cette amélioration entraîne cependant un surcoût en temps de calcul.
+
+Des améliorations sont encore possibles, il est notamment possible de diminuer le temps de calcul à chaque itération en optimisant les opérations, mais cela n'entre pas dans le cadre de ce TDP.
