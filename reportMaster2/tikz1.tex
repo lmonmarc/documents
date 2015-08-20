@@ -1,5 +1,5 @@
-\begin{tikzpicture}
-\tikzstyle{place}=[circle,thick,draw=blue!75,fill=blue!20,minimum size=2mm]
+\begin{tikzpicture}[scale=0.8]
+\tikzstyle{place}=[circle,thick,draw=blue!75,fill=blue!20,minimum size=4mm]
 
 \node[place] (p1) at (0,0) {};
 \node[place] (p2) at (0,1) {};
@@ -25,7 +25,7 @@
 \draw[->] (p4) to (p1);
 \draw[->] (p5) to (p1);
 
-\tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=2mm]
+\tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=4mm]
 
 \foreach \x in {-3,...,3}
 {
