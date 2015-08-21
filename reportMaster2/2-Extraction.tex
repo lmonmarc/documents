@@ -16,7 +16,7 @@ Décrire les problèmes à résoudre et le parallélisme qu'ils peuvent utiliser
 Les langages dédiés aux scientifiques sont la plupart du temps des outils de simulation à destination d'experts dans ce domaine. Dans le cas des mathématiques par exemple, de nombreux logiciels définissant leur propre langage existent : \textsf{\href{http://www.wolfram.com/mathematica/}{Mathematica}}, \textsf{\href{http://fr.mathworks.com/}{MATLAB}} ou encore \textsf{\href{http://pari.math.u-bordeaux.fr/}{PARI/GP}} ; et une partie de leurs algorithmes sont parallélisés (au moins au niveau d'un processeur) pour des raisons de performances. Des initiatives plus poussées du côté du parallélisme sont également présentes en recherche comme \textsf{QIRAL} \cite{Art13,Art14} qui à partir d'algorithmes décrits en \LaTeX permet de générer un code parallèle optimisé pour les processeurs des ordinateurs courants -- mais pas pour les supercalculateurs --, il se base pour cela sur le système de réécriture \textsf{Maude} \cite{Art12}. La logique est alors la suivante : offrir à l'utilisateur les mêmes fonctions qui sont connues dans son domaine, en cachant l'implantation et la parallélisation de ces fonctions (telles qu'un calcul de facteurs premiers par exemple).
 
 \paragraph{Langages dédiés au parallélisme.}
-Quant il s'agit de développeurs souhaitant écrire du code parallèle sans forcément connaître les subtilités des machines d'exécutions, différents langages spécifiques ont été créés. De manière générale il s'agit en fait d'un langage déjà connu (\textsf{Java} ou \textsf{C/C++}) auquel sont ajoutés quelques mots-clés ou éléments de syntaxes (souvent pour les tableaux notamment) ; \textsf{\href{http://chapel.cray.com/}{Chapel}}, \textsf{\href{https://www.cilkplus.org/}{Cilk}}, \textsf{\href{http://upc.lbl.gov/}{UPC}}, \textsf{Lime} \cite{Art8}, \textsf{\href{http://x10-lang.org/}{X10}} et le langage proposé dans\cite{Art10} rentrent dans cette catégorie. Alors que les trois premiers cités sont très proches des langages d'origines, les trois derniers sont plus éloignés et proposent des paradigmes différents (comme les Map/Reduce dans \textsf{Lime} ou les horloges dans \textsf{X10}). Avec ces langages viennent souvent les compilateurs associés, toutefois parfois il s'agit plus simplement de réécriture automatique de code (vers un langage déjà existant) comme proposé par \textsf{Par4All} \cite{Ths2}. \textsf{Par4All} peut d'ailleurs être considéré comme un éditeur de code dédié au parallélisme, de même que le projet \textsf{Eclipse \href{http://www.eclipse.org/ptp/}{PTP}} (Parallel Tools Platform)ou les projets présentés dans les articles \cite{Art23,Art25}. Ces éditeurs rassemblent alors généralement plusieurs outils, et sont plus interactifs, mais leur parallélisation n'est pas toujours optimale.
+Quant il s'agit de développeurs souhaitant écrire du code parallèle sans forcément connaître les subtilités des machines d'exécutions, différents langages spécifiques ont été créés. De manière générale il s'agit en fait d'un langage déjà connu (\textsf{Java} ou \textsf{C/C++}) auquel sont ajoutés quelques mots-clés ou éléments de syntaxes (souvent pour les tableaux notamment) ; \textsf{\href{http://chapel.cray.com/}{Chapel}}, \textsf{\href{https://www.cilkplus.org/}{Cilk}}, \textsf{\href{http://upc.lbl.gov/}{UPC}}, \textsf{Lime} \cite{Art8}, \textsf{\href{http://x10-lang.org/}{X10}} et le langage proposé dans\cite{Art10} rentrent dans cette catégorie. Alors que les trois premiers cités sont très proches des langages d'origines, les trois derniers sont plus éloignés et proposent des paradigmes différents (comme les Map/Reduce dans \textsf{Lime} ou les horloges dans \textsf{X10}). Avec ces langages viennent souvent les compilateurs associés, toutefois parfois il s'agit plus simplement de réécriture automatique de code (vers un langage déjà existant) comme proposé par \textsf{Par4All} \cite{Ths2}. \textsf{Par4All} peut d'ailleurs être considéré comme un éditeur de code dédié au parallélisme, de même que le projet \textsf{Eclipse \href{http://www.eclipse.org/ptp/}{PTP}} (Parallel Tools Platform) ou les projets présentés dans les articles \cite{Art23,Art25}. Ces éditeurs rassemblent alors généralement plusieurs outils, et sont plus interactifs, mais leur parallélisation n'est pas toujours optimale.
 
 \paragraph{Bibliothèques spécialisées.}
 Pour atteindre un parallélisme optimal il est souvent nécessaire de descendre à un niveau plus proche du matériel. Plutôt que d'introduire quelques mots-clés supplémentaires, il s'agit alors de plusieurs dizaines de fonctions regroupées dans des bibliothèques. Il faut alors parfois utiliser différentes bibliothèques afin de gérer les différents niveaux de parallélisme (notamment interprocesseur et intraprocesseur). La bibliothèque utilisée dans le cadre du stage en fait partie : \textsf{\href{https://www.khronos.org/sycl}{SYCL}}. C'est celle qui est la plus haut niveau tout en offrant le plus de possibilités. La bibliothèque connue qui s'en rapproche le plus est \textsf{\href{https://www.khronos.org/opencl/}{OpenCL}} mais nécessite déjà plus d'efforts notamment pour gérer les communications entre les processeurs. En revanche \textsf{\href{http://openmp.org/wp/}{OpenMP}} (qui est en fait intégrée dans la plupart des compilateurs pour \textsf{Fortran}, \textsf{C/C++}) est beaucoup plus simple mais ne s'utilise que pour les processeurs génériques et non les processeurs graphiques. D'autres bibliothèques sont justement dédiés à la gestion de plusieurs types de processeurs en même temps, il s'agit des \emph{supports d'exécutions} tels que \textsf{\href{http://starpu.gforge.inria.fr/}{StarPU}} ou \textsf{\href{http://icl.utk.edu/parsec/}{PaRSEC}}. Comme la plupart des problèmes parallélisés sont liés à l'utilisation de grand tableaux, \textsf{Kokkos} \cite{Web5} et \textsf{\href{http://hpc.pnl.gov/globalarrays/}{Global Arrays}} permettent de simplifier leur utilisation et répartition sur les différents processeurs, mais ils ne gèrent pas le lancement des calculs contrairement aux supports d'exécutions. Plus spécifiquement encore l'article \cite{Art2} propose une solution simplifiant l'utilisation des tableaux avec le parallélisme, au sein d'un processeur. Enfin certaines rares bibliothèques se penchent plutôt sur les caractéristiques des algorithmes utilisés comme \textsf{SkePU} \cite{MstThs1}, qui s'apparente à un moteur d'exécution et utilise la formalisation de squelettes algorithmiques.
@@ -59,27 +59,63 @@ Todd L. Veldhuizen, le concepteur de \textsf{Blitz++}, a introduit la notion d'\
 
 \subsection{Objectifs sémantiques}
 
-Le premier objectif sémantique est tout simplement de pouvoir décrire toutes les formes de stencils. Le stencil lui-même est déterminé par les indices des éléments qui rentrent en jeu dans le calcul. Dans l'exemple précédent de stencil à quatre points dans une grille en deux dimensions, si nous considérons comme origine du repère un élément quelconque à mettre à jour alors les éléments nécessaires à sa mise à jour sont d'indices $(-1,0)$, $(1,0)$, $(0,-1)$ et $(0,1)$. La simple connaissance de ces indices relatifs permet de retrouver le motif du stencil, il est donc primordial de pouvoir déclarer simplement les indices entrant en jeu dans le stencil.
+Le premier objectif sémantique est tout simplement de pouvoir décrire toutes les formes de stencils. Le stencil lui-même est déterminé par les indices des éléments qui rentrent en jeu dans le calcul. Dans l'exemple précédent de stencil à quatre points dans une grille en deux dimensions, si nous considérons comme origine du repère un élément quelconque à mettre à jour alors les éléments nécessaires à sa mise à jour sont d'indices $(-1,0)$, $(1,0)$, $(0,-1)$ et $(0,1)$. La simple connaissance de ces indices relatifs permet de retrouver le motif du stencil, il est donc primordial de pouvoir déclarer simplement les indices entrant en jeu dans le stencil. Dans la suite du document nous appelons ces indices relatifs les \emph{indices de décalage}.
 
-Par ailleurs un stencil peut nécessiter des coefficients. Par exemple dans le cas de l'algorithme classique Jacobi, ces coefficients sont constants et ne sont liés qu'aux positions relatives des indices du stencil. Si la grille des éléments est stockée dans un tableau $A$ à deux dimensions, l'équation associée à la mise à jour d'un élément $(i,j)$ par le stencil pourrait donc s'écrire de façon mathématique comme l'équation \ref{eq:st0_fxd} où les $c_x$ sont les coefficients fixes.
+Par ailleurs un stencil peut nécessiter des coefficients. Par exemple dans le cas de l'algorithme classique Jacobi, ces coefficients sont constants et ne sont liés qu'aux positions relatives des éléments accédés par le stencil. Si la grille des éléments est stockée dans un tableau $A$ à deux dimensions, l'équation associée à la mise à jour d'un élément d'indice global $(i,j)$ par le stencil pourrait donc s'écrire de façon mathématique comme l'équation \ref{eq:st0_fxd} où les $c_x$ sont les coefficients fixes.
 \begin{equation}
 \label{eq:st0_fxd}
 A[i,j] = c_1 \times A[i-1,j+0] + c_2 \times A[i+1,j+0] + c_3 \times A[i+0,j-1] + c_4 \times A[i+0,j+1]
 \end{equation}
+Les coefficients étant dans ce cas liés aux indices de décalage, un DSEL doit donc permettre la possibilité de déclarer les deux en même temps.
 
-Toutefois cet exemple ne regroupe pas tous les cas possibles, il est par exemple possible d'imaginer abstraire l'opération de réduction qu'est ici la somme -- ce qui n'est pas très utile --, de même que l'opération liant les coefficients aux éléments de la grille -- ce qui est beaucoup plus utile, par exemple si les éléments ne sont pas de simples scalaires, mais des matrices ou des nombres complexes. Nous notons donc respectivement $\oplus$ et $\otimes$ ces deux opérations. L'équation \ref{eq:st0_fxd} se réécrit alors en l'équation \ref{eq:st0_var}.
+Toutefois cet exemple ne regroupe pas tous les cas possibles, il est par exemple possible d'imaginer abstraire l'opération de réduction qu'est ici la somme -- ce qui n'est pas très utile --, de même que l'opération liant les coefficients aux éléments de la grille -- ce qui est beaucoup plus utile par exemple si les éléments ne sont pas de simples scalaires, mais des matrices ou des nombres complexes. Nous notons respectivement $\oplus$ et $\otimes$ ces deux opérations, l'équation \ref{eq:st0_fxd} se réécrit alors en l'équation \ref{eq:st1_fxd}.
 \begin{equation}
-\label{eq:st0_var}
+\label{eq:st1_fxd}
 A[i,j] = c_1 \otimes A[i-1,j+0] \oplus c_2 \otimes A[i+1,j+0] \oplus c_3 \otimes A[i+0,j-1] \oplus c_4 \otimes A[i+0,j+1]
 \end{equation}
+La nature des opérateurs doit donc apparaître dans la définition du stencil.
 
+Une autre variante sur les coefficients consiste à les considérer variables en fonction non seulement de l'élément calculé, mais aussi en fonction du décalage pour chaque élément entrant en compte. Une telle possibilité est parfois utile, notamment dans les calculs de chromodynamique quantique. Nous notons $f$ la fonction qui renvoie le coefficient en fonction des différents indices (celui de l'élément traité, et celui des éléments utilisés). En deux dimensions $f$ prend donc quatre arguments et l'équation \ref{eq:st1_fxd} devient l'équation \ref{eq:st1_var}.
+\begin{equation}
+\label{eq:st1_var}
+\begin{aligned}
+A[i,j] = & f(i, j, -1,  0) \otimes A[i-1,j+0] \oplus \\
+         & f(i, j,  1,  0) \otimes A[i+1,j+0] \oplus \\
+         & f(i, j,  0, -1) \otimes A[i+0,j-1] \oplus \\ 
+         & f(i, j,  0,  1) \otimes A[i+0,j+1]
+\end{aligned}
+\end{equation}
 
+Cette dernière équation est un peu plus complexe à abstraire car les coefficients ne sont plus seulement liés aux indices relatifs de décalage. En effet le stencil est alors défini par une fonction supplémentaire, et la déclaration d'une telle fonction peut-être laborieuse. Pour rendre cette fonction plus simple à déclarer, $f$ devient alors une fonction d'accès uniquement qui au lieu de déterminer la valeur du coefficient grâce au paramètre, permet d'accéder à l'endroit où se situe le coefficient pré-calculé dans un tableau. La déclaration de $f$ est alors plus aisée, mais le stencil nécessite également la connaissance du tableau de coefficients (que l'utilisateur doit lui-même pré-remplir). $f$ prend alors un cinquième argument (le tableau) noté $C$.
 
--> tableaux coefs
+Ce choix d'avoir un tableau supplémentaire, permet d'ailleurs d'abstraire la structure des données, et il serait souhaitable de l'utiliser non seulement pour les coefficients variables, mais aussi pour les éléments de la grille de calcul. Cette fonction $g$ prend alors en argument l'indice -- non-relatif, global -- de l'élément courant ainsi que le tableau de la grille. De cette façon la grille peut être stockée sous une forme entièrement paramétrable : \emph{row major}\footnote{Dans le cas d'une grille à deux dimensions, la disposition \emph{row major} consiste à placer les lignes les unes à la suite des autres dans un tableau à une dimension.}, \emph{column major}\footnote{Idem note précédente, par colonne.} ou autre. On peut alors réécrire la dernière équation, en considérant maintenant le fait que le calcul ne se fait pas en place et que le résultat est stocké dans un tableau $B$, et l'on obtient l'équation \ref{eq:st2_var}.
+\begin{equation}
+\label{eq:st2_var}
+\begin{aligned}
+g(i,j,B) = & f(i, j, -1, \quad 0, C) \otimes g(i-1, j+0, A) \, \oplus \\
+           & f(i, j, \quad 1, \quad 0, C) \otimes g(i+1,j+0, A) \, \oplus \\
+           & f(i, j, \quad 0, -1, C) \otimes g(i+0,j-1, A) \, \oplus \\ 
+           & f(i, j, \quad 0, \quad 1, C) \otimes g(i+0,j+1, A)
+\end{aligned}
+\end{equation}
 
--> tableaux données
+En résumé l'application d'un stencil sur une grille nécessite l'enregistrement dans le DSEL des éléments suivants : 
+\begin{itemize}
+\item les indices de décalage (avec éventuellement les coefficients constants) ;
+\item la fonction d'accès aux coefficients variables et le tableau associé (s'il n'y a pas de coefficients constants) ;
+\item les opérateurs de réduction $\oplus$ et d'application du coefficient à l'élément $\otimes$ ;
+\item les tableaux d'entrées et sorties ;
+\item la fonction d'accès pour ces deux tableaux.
+\end{itemize}
 
--> abstraire les structurations de données (copies tuiles, et data layout)
+Éventuellement, le DSEL peut prévoir plusieurs types d'agrégations :
+\begin{itemize}
+\item la combinaison de plusieurs motifs de stencils en un seul ;
+\item la possibilité d'appliquer le même motif sur plusieurs tableaux à la fois ;
+\item le \emph{stream} (ou \emph{flux}) de plusieurs stencils à la suite sur un unique tableau de départ, les tableaux intermédiaires étant alors omis.
+\end{itemize}
+
+Les caractères joli et sûr du DSEL sont nécessairement dépendant du langage choisi. En ce qui concerne l'élégance, il s'agit d'utiliser le moins de symboles et fonctions possibles, et de cacher tous les paramètres inutiles. Pour la sûreté le but est de détecter certains types d'erreurs comme l'utilisation du même tableau en entrée et en sortie (en supposant que le calcul en place n'a pas lieu d'être) et l'usage d'indices de décalage en dehors de la grille.
 
 \subsection{Objectifs de performances}
 
