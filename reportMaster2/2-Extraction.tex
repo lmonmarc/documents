@@ -55,16 +55,25 @@ L'élément premier de la hiérarchie de la mémoire est le disque dur, qui est 
 
 Principalement deux DSEL existent déjà pour les stencils : \textsf{Pochoir} et \textsf{Blitz++} cependant les deux souffrent de plusieurs désavantages. Les deux nécessitent l'apprentissage de plusieurs mots-clés qui fonctionnent généralement comme des balises HTML : ils ouvrent des sections spécifiques puis les ferment. Cela facilite certainement l'analyse du code par le compilateur dans le cas de \textsf{Pochoir}, mais dans les deux cas cela est contraire au paradigmes assez répondu de l'utilisation de fonctions à arguments (ou bien méthodes) pour initialiser ou faire des calculs sur des éléments (objets, structures, etc\ldots) -- que ce soit dans la programmation orientée objet, impérative ou fonctionnelle. Par ailleurs \textsf{Blitz++} souffre de l'utilisation de \emph{macros}, des parties de codes qui sont rajoutées dans le code par le compilateur avant la compilation, mais sont parfois présentées comme des fonctions au développeur ; en cas d'erreur lors de la compilation il peut donc il y avoir confusion sur son origine. Enfin les deux DSEL se focalisent sur une exécution sur CPU uniquement, alors que les GPU sont très adaptés à ce genre d'opérations.
 
-Todd L. Veldhuizen, le concepteur de \textsf{Blitz++}, a introduit la notion d'\emph{active libraries} (\emph{bibliothèques actives}) \cite{Art20} afin de décrire ce qu'un DSEL notamment (ainsi que le compilateur associé) doit proposer a minima. Ces bibliothèques doivent tirer partie de toutes les possibilités dont elles disposent : à la fois la sémantique de l'expression qui est codée par le biais du DSEL, et à la fois les performances offertes par des bibliothèques spécialisées dans certains types d'opérations. Elles sont actives car elles ne fournissent pas seulement des méthodes optimisées, elles les choisissent en fonction de l'expression. Par ailleurs Todd Veldhuizen propose dans l'article \cite{Art22} trois aspects à développer dans le DSEL afin d'obtenir des performances : \emph{Pretty, Safe, Fast} (pour joli, sûr, et rapide). Ces trois aspects sont au centre des préoccupations avec lesquelles le DSEL a été développé au cours du stage.
-
+Todd L. Veldhuizen, le concepteur de \textsf{Blitz++}, a introduit la notion d'\emph{active libraries} (\emph{bibliothèques actives}) \cite{Art20} afin de décrire ce qu'un DSEL notamment (ainsi que le compilateur associé) doit proposer a minima. Ces bibliothèques doivent tirer partie de toutes les possibilités dont elles disposent : à la fois la sémantique de l'expression qui est codée par le biais du DSEL, et à la fois les performances offertes par des bibliothèques spécialisées dans certains types d'opérations. Elles sont actives car elles ne fournissent pas seulement des méthodes optimisées, elles les choisissent en fonction de l'expression. Par ailleurs Todd Veldhuizen propose dans l'article \cite{Art22} trois aspects à développer dans le DSEL afin d'obtenir des performances : \emph{Pretty, Safe, Fast} (pour joli, sûr, et rapide). Ces trois aspects sont au centre des préoccupations avec lesquelles le DSEL a été développé au cours du stage. Tandis que nous regroupons le caractère joli et sûr dans les objectifs sémantiques, la rapidité est quant à elle liée à la performance.
 
 \subsection{Objectifs sémantiques}
 
-De quoi a-t-on besoin pour décrire un stencil
+Le premier objectif sémantique est tout simplement de pouvoir décrire toutes les formes de stencils. Le stencil lui-même est déterminé par les indices des éléments qui rentrent en jeu dans le calcul. Dans l'exemple précédent de stencil à quatre points dans une grille en deux dimensions, si nous considérons comme origine du repère un élément quelconque à mettre à jour alors les éléments nécessaires à sa mise à jour sont d'indices $(-1,0)$, $(1,0)$, $(0,-1)$ et $(0,1)$. La simple connaissance de ces indices relatifs permet de retrouver le motif du stencil, il est donc primordial de pouvoir déclarer simplement les indices entrant en jeu dans le stencil.
 
--> indices coefs
+Par ailleurs un stencil peut nécessiter des coefficients. Par exemple dans le cas de l'algorithme classique Jacobi, ces coefficients sont constants et ne sont liés qu'aux positions relatives des indices du stencil. Si la grille des éléments est stockée dans un tableau $A$ à deux dimensions, l'équation associée à la mise à jour d'un élément $(i,j)$ par le stencil pourrait donc s'écrire de façon mathématique comme l'équation \ref{eq:st0_fxd} où les $c_x$ sont les coefficients fixes.
+\begin{equation}
+\label{eq:st0_fxd}
+A[i,j] = c_1 \times A[i-1,j+0] + c_2 \times A[i+1,j+0] + c_3 \times A[i+0,j-1] + c_4 \times A[i+0,j+1]
+\end{equation}
 
--> pattern du stencil
+Toutefois cet exemple ne regroupe pas tous les cas possibles, il est par exemple possible d'imaginer abstraire l'opération de réduction qu'est ici la somme -- ce qui n'est pas très utile --, de même que l'opération liant les coefficients aux éléments de la grille -- ce qui est beaucoup plus utile, par exemple si les éléments ne sont pas de simples scalaires, mais des matrices ou des nombres complexes. Nous notons donc respectivement $\oplus$ et $\otimes$ ces deux opérations. L'équation \ref{eq:st0_fxd} se réécrit alors en l'équation \ref{eq:st0_var}.
+\begin{equation}
+\label{eq:st0_var}
+A[i,j] = c_1 \otimes A[i-1,j+0] \oplus c_2 \otimes A[i+1,j+0] \oplus c_3 \otimes A[i+0,j-1] \oplus c_4 \otimes A[i+0,j+1]
+\end{equation}
+
+
 
 -> tableaux coefs
 
