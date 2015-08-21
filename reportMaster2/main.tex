@@ -10,7 +10,7 @@
 \graphicspath{{./img/}}
 
 \usepackage{geometry}
-\geometry{hmargin=3cm,vmargin=3cm}
+\geometry{hmargin=2.5cm,vmargin=2.5cm}
 
 \usepackage{tikz}
 
@@ -20,10 +20,15 @@
 
 \usepackage{floatrow}
 
-\usepackage[backend=biber]{biblatex}
+\usepackage[backend=biber,style=numeric,doi=false,isbn=false,hyperref=true,backref=true]{biblatex}
 \addbibresource{art.bib}
 \addbibresource{online.bib}
 \addbibresource{ths.bib}
+
+\DefineBibliographyStrings{french}{%
+    backrefpage  = {cf p.}, % for single page number
+    backrefpages = {cf pp.} % for multiple page numbers
+}
 
 \usepackage{hyperref}
 \hypersetup{colorlinks=true}
