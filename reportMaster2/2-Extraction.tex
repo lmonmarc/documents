@@ -119,12 +119,26 @@ Les caractères joli et sûr du DSEL sont nécessairement dépendant du langage 
 
 \subsection{Objectifs de performances}
 
+Les performances peuvent s'obtenir grâce à l'adaptation du code tant par rapport au matériel que par rapport aux algorithmes de calculs utilisés. Deux voies principales doivent être explorées : la réutilisation maximale des données dans le cache (qui induit le principe de \emph{tuilage}), le calcul du plus grand nombre de paramètres possibles lors de la compilation (les variables en jeu étant alors \emph{statiques}).
+
+\subsubsection*{Tuilage de stencil} 
+
+Avant de déterminer quels paramètres peuvent être calculés à la compilation, il est nécessaire de voir plus en détail comment la parallélisation va être effectuée au sein du stencil. Puisque les tableaux utilisés dans les calculs sont généralement trop grand pour la mémoire respectivement cache ou locale proche des processeurs respectivement centraux ou graphiques, la grille de l'exemple précédent est divisée en blocs que nous appelons \emph{macro-tuiles}. La taille de chaque macro-tuile est choisie de façon que la mémoire utilisée par les calculs tienne soit dans les caches L3 soit dans la mémoire locale (cf figure \ref{fig:memoire_base}). La façon de paralléliser la macro-tuile est la suivante : chaque processeur central (ou warp dans le cas des cartes graphiques) est lié à une macro-tuile et chaque cœur va appliquer le stencil sur un ou plusieurs éléments différents\footnote{La notion de \emph{tuile} sera utilisée dans la section ... et fait référence à la parallélisation au sein d'un cœur, et non au sein d'un processeur.}. Si l'on reprend l'exemple de la figure \ref{fig:memoire_base}, la parallélisation par tuilage sur la carte graphique sur une grille de $10$ par $10$ éléments va pouvoir se faire en la découpant en quatre blocs carrés chacun associé à un warp.
+
+\begin{figure}[!h]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,center},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{Exemple de tuilage d'une grille en deux dimensions.}\label{fig:stencil_mtile}}
+{\input{tikz2.tex}}
+\end{figure}
+
 
 -> tuiles/caches (data reuse)
 
--> calculs à la compilation
-
-
 QCD \cite{Art1}
 3.5D blocking \cite{Art11}
+
+
+
+\subsubsection*{Variables statiques}
+
 

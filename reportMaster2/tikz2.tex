@@ -1,0 +1,44 @@
+\begin{tikzpicture}[scale=0.8]
+\tikzstyle{place}=[circle,thick,draw=blue!75,fill=blue!20,minimum size=4mm]
+
+\draw[dashed,fill=yellow!30] (0.5,-0.5) rectangle (4.5,0.5);
+\draw[dashed,fill=yellow!30] (-0.5,0.5) rectangle (0.5,4.5);
+\draw[dashed,fill=yellow!30] (0.5,4.5) rectangle (4.5,5.5);
+\draw[dashed,fill=yellow!30] (4.5,0.5) rectangle (5.5,4.5);
+
+\draw[fill=yellow!30] (0.5,0.5) rectangle (4.5,4.5);
+\draw (4.5,4.5) rectangle (8.5,8.5);
+\draw (0.5,4.5) rectangle (4.5,8.5);
+\draw (4.5,0.5) rectangle (8.5,4.5);
+
+
+\foreach \x in {1,...,8}
+{
+  \foreach \y in {1,...,8}
+  {
+    \node[place] () at (\x,\y) {};
+  }
+}
+
+\node () at (2.5,2.5) {Warp 0};
+\node () at (6.5,2.5) {Warp 1};
+\node () at (6.5,6.5) {Warp 2};
+\node () at (2.5,6.5) {Warp 3};
+
+
+\tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=4mm]
+
+\foreach \x in {0,...,9}
+{
+  \node[place] () at (\x,0) {};
+  \node[place] () at (\x,9) {};
+}
+\foreach \y in {1,...,8}
+{
+  \node[place] () at (0,\y) {};
+  \node[place] () at (9,\y) {};
+}
+
+
+
+\end{tikzpicture}
