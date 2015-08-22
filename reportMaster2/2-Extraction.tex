@@ -123,22 +123,36 @@ Les performances peuvent s'obtenir grâce à l'adaptation du code tant par rappo
 
 \subsubsection*{Tuilage de stencil} 
 
-Avant de déterminer quels paramètres peuvent être calculés à la compilation, il est nécessaire de voir plus en détail comment la parallélisation va être effectuée au sein du stencil. Puisque les tableaux utilisés dans les calculs sont généralement trop grand pour la mémoire respectivement cache ou locale proche des processeurs respectivement centraux ou graphiques, la grille de l'exemple précédent est divisée en blocs que nous appelons \emph{macro-tuiles}. La taille de chaque macro-tuile est choisie de façon que la mémoire utilisée par les calculs tienne soit dans les caches L3 soit dans la mémoire locale (cf figure \ref{fig:memoire_base}). La façon de paralléliser la macro-tuile est la suivante : chaque processeur central (ou warp dans le cas des cartes graphiques) est lié à une macro-tuile et chaque cœur va appliquer le stencil sur un ou plusieurs éléments différents\footnote{La notion de \emph{tuile} sera utilisée dans la section ... et fait référence à la parallélisation au sein d'un cœur, et non au sein d'un processeur.}. Si l'on reprend l'exemple de la figure \ref{fig:memoire_base}, la parallélisation par tuilage sur la carte graphique sur une grille de $10$ par $10$ éléments va pouvoir se faire en la découpant en quatre blocs carrés chacun associé à un warp.
+Avant de déterminer quels paramètres peuvent être calculés à la compilation, il est nécessaire de voir plus en détail comment la parallélisation va être effectuée au sein du stencil. Puisque les tableaux utilisés dans les calculs sont généralement trop grand pour la mémoire respectivement cache ou locale proche des processeurs respectivement centraux ou graphiques, la grille de l'exemple précédent est divisée en blocs que nous appelons \emph{macro-tuiles}. La taille de chaque macro-tuile est choisie de façon que la mémoire utilisée par les calculs tienne soit dans les caches L3 soit dans la mémoire locale (cf figure \ref{fig:memoire_base}). La façon de paralléliser la macro-tuile est la suivante : chaque processeur central (ou warp dans le cas des cartes graphiques) est lié à une macro-tuile et chaque cœur va appliquer le stencil sur un ou plusieurs éléments différents\footnote{La notion de \emph{tuile} sera utilisée dans la section \ldots et fait référence à la parallélisation au sein d'un cœur, et non au sein d'un processeur.}. Si l'on reprend l'exemple de la figure \ref{fig:memoire_base} avec le stencil à $4$ points, la parallélisation par tuilage sur la carte graphique sur une grille de $10$ par $10$ éléments va pouvoir se faire en la découpant en quatre blocs carrés chacun associé à un warp. Chaque \emph{warp} possédant chacun $16$ cœurs va appliquer le stencil sur une macro-tuile de dimensions $4 \times 4$. La figure \ref{fig:stencil_mtile} représente cette situation en précisant par des bordures en pointillées les éléments fantômes que le \emph{warp} $0$ coloré en jaune devra contenir. Bien que les seuls fantômes à la base soient les éléments rouges en bordure de la grille, chaque \emph{warp} a besoin de charger les éléments autour de lui compte-tenu de la forme du stencil.
 
 \begin{figure}[!h]
 \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,center},capbesidewidth=4cm}}]{figure}[\FBwidth]
-{\caption{Exemple de tuilage d'une grille en deux dimensions.}\label{fig:stencil_mtile}}
+{\caption{Exemple de tuilage d'une grille en deux dimensions sur une carte graphique possédant $4$ \emph{warps} Les éléments calculés sont en bleus, les fantômes en rouges et dans les cadres pointillés.}\label{fig:stencil_mtile}}
 {\input{tikz2.tex}}
 \end{figure}
 
+L'intérêt du tuilage est de pouvoir faire rentrer tous les éléments nécessaires à la mise-à-jour d'une macro-tuile dans le cache L3 (ou la mémoire locale) du processeur (ou du warp) qui la traite. De plus nous ne perdons pas en parallélisation (dans l'exemple précédent tous les éléments sont calculés en même temps puisqu'il y a autant d'éléments que de cœurs). La gestion de la mémoire n'est cependant pas parfaite, puisque chaque macro-tuile nécessite sa zone fantôme dont les éléments ne seront utilisés qu'une seule fois. D'autres formes de découpage que les blocs carrés existent, afin de minimiser cette zone fantôme suivant la forme du stencil, ce point sera évoquée à la section \ldots.
 
--> tuiles/caches (data reuse)
+Le cas de la figure \ref{fig:stencil_mtile} est simple car il y a autant de cœurs que d'éléments à calculer, il reste donc à gérer le cas général où la grille de base est beaucoup plus grande que le nombre de cœurs, et dont les dimensions n'en sont pas forcément des multiples entiers d'ailleurs. En pratique les macro-tuiles vont alors être calculées les unes après les autres. Et si les dimensions de la grille ne sont multiples du nombres de processeurs, les macro-tuiles dont certains éléments dépassent de la grille ne seront pas calculés, par l'intervention de condition sur la taille globale. 
 
-QCD \cite{Art1}
-3.5D blocking \cite{Art11}
-
-
+De même cet exemple est uniquement en deux dimensions, mais certains calculs nécessitent des stencils sur des grilles à quatre dimensions, notamment en chromodynamique quantique. Certains articles \cite{Art1,Art11} développent des techniques spécifiques pour y remédier, tout en gardant une certaine réutilisation des données. Ces techniques sont très spécialisées et ne seront pas évoquées ici, toutefois il convient de savoir qu'elles existent et que le DSEL devrait être capable à terme de les intégrer.
 
 \subsubsection*{Variables statiques}
 
+Les variables statiques vont permettre d'éviter au programme certains calculs lors de l'exécution (qui sont alors reportés à l'exécution), et donc d'être légèrement plus rapide. Les principales variables entrant en jeu pour la parallélisation sont :
+\begin{itemize}
+\item le nombre de dimensions de la grille ;
+\item le nombre d'éléments dans chaque dimension de la grille ;
+\item le nombre d'éléments du stencil ;
+\item les indices de décalage du stencil ;
+\item la taille des zones fantômes de la grille ;
+\item la quantité de mémoire disponible en mémoire cache de niveau 3 ou en mémoire locale ;
+\item le nombre de processeurs et cœurs disponibles à l'intérieur ;
+\item la forme et la taille des macro-tuiles ;
+\item la taille des zones fantômes des macro-tuiles.
+\end{itemize}
+
+Toutes ces variables peuvent (et doivent) être statique hormis le nombre d'éléments de la grille, qui par choix est déterminé à l'exécution. En effet nous supposons que le programme doit être compilé pour chaque problème différent (donc avec des stencils différents) mais pas pour chaque instance du même problème, où seul le nombre d'éléments (donc la précision de la résolution) change. C'est cette approche qui est aussi utilisée dans \textsf{QIRAL}. Le problème est alors de savoir comment calculer ces variables statiquement -- certaines peuvent se déduire les unes des autres --, et cela dépend du langage choisi pour le DSEL, notamment si le langage autorise la méta-programmation, une façon de modifier le comportement de certaines fonctions à la compilation. 
+
+Plus généralement, d'autres variables aidant dans l'ordonnancement des calculs (notamment si plusieurs types de processeurs sont disponibles) pourraient (mais difficilement) être calculées lors de la compilation, mais cela n'a pas été étudié dans le cadre du stage, d'autant que la tendance actuelle est justement à l'opposée : c'est le rôle des supports d'exécutions que de faire ces calculs lors de l'exécution. Outre l'ordonnancement des calculs, il s'agit aussi d'ordonnancer les recopies mémoires, notamment vers la mémoire globale des processeurs graphiques.
 
