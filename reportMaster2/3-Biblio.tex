@@ -2,18 +2,34 @@
 
 \chapter{Bibliothèque de stencils basée sur SYCL}
 
+Au cours du stage a été développée un DSEL de stencils sous la forme d'une bibliothèque \textsf{C++} miniature. Ce DSEL essaie de reprendre les objectifs explicités dans le chapitre précédent, toutefois il s'agit plutôt d'une preuve de faisabilité ce pour quoi tous les objectifs n'ont pas été implémentés (mais leur intégration a été prévue). Ce chapitre se concentre sur la présentation de ce DSEL en ce qui concerne son utilisation, quelques détails d'implantations, ainsi que le travail restant.
+
 \section{Présentation générale}
 
 Fonctions disponibles
 
+\subsection{Création des stencils}
+
+\subsection{Application des stencils}
+
+
+
 \section{Détails d'implantation}
+
+\subsection{Précisions sur le \textsf{C++14} et l'utilisation de \textsf{SYCL}}
 
 C++14 et autres
 Expression template \cite{Web4,Art21}
 Partial specialization \cite{Web1}
 Typename keyword \cite{Web2}
 
+\subsection{Calcul des paramètres de tuilage}
+\label{sec:param_tuile}
+
+
+
 \section{\'Evolutions possibles}
+\label{sec:evol_biblio}
 
 Reprendre slides : surtout agrégation de stencils
 Overlapped tiling \cite{Art17}
