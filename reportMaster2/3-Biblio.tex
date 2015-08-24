@@ -62,6 +62,7 @@ float  fdl_in(int a,int b,
 \end{minted}
 
 Les tableaux de l'entrée et de la sortie sont déclarés sous forme de buffers, exactement comme dans le cas précédent à la différence qu'ils sont bien en deux dimensions cette fois. Une fois tous les éléments déclarés, il est donc possible de former l'opération comme dans le code ci-dessous.
+\label{cd:tab_io}
 \begin{minted}{cpp}
 /* assemblage des éléments de l'entrée, dans l'ordre :
  * type, buffer des éléments en entrée, buffer des 
@@ -97,12 +98,39 @@ L'utilisation du \textsf{C++} et notamment de la méta-programmation a permis le
 
 \subsection{Précisions sur le \textsf{C++14} et l'utilisation de \textsf{SYCL}}
 
-C++14 et autres
-Expression template \cite{Web4,Art21}
-+ ordre des opérations
+Le DSEL est développé avec le dernier standard officiel du \textsf{C++}, \textsf{C++14}, afin d'être compatible avec \textsf{SYCL}. En effet l'implantation utilisée de \textsf{SYCL} est \textsf{triSYCL}, qui est une bibliothèque écrite en \textsf{C++14} par Ronan Keryell. Celle-ci utilise notamment les possibilités des \emph{lambda fonctions} et du mot-clé \textsf{auto}, introduits à partir de \textsf{C++11} et augmentés en \textsf{C++14}. Outre les éléments de langages, \textsf{triSYCL} s'appuie également sur \textsf{boost} par exemple pour la gestion des tableaux multidimensionnels, ainsi que sur \textsf{OpenMP} pour une parallélisation naïve. L'interface \textsf{SYCL} fournit un certain nombre de fonctions pour faciliter le parallélisme, parmi elles notons :
+\begin{itemize} 
+\item la découverte (potentiellement) automatique du matériel disponible sur la machine ;
+\item la gestion automatique des transferts de données avec ces matériels (la mémoire globale des cartes graphiques principalement) ;
+\item le lancement de \emph{noyaux} de calcul sur le matériel désiré, avec configuration possible des tailles de \emph{warps}.
+\end{itemize}
+L'interface contient de nombreuses autres possibilités, pour beaucoup calquées sur \textsf{OpenCL}, mais seule une petite partie a pu être testée puis utilisée dans le DSEL, car l'implantation de \textsf{triSYCL} n'est pas terminée. Toutefois l'implantation actuelle est suffisante pour les besoins du DSEL.
 
-Partial specialization \cite{Web1}
-Typename keyword \cite{Web2}
+En ce qui concerne le DSEL lui-même, il utilise plus particulièrement la notion d'\emph{expression template} \cite{Web4,Art21} qui est une façon de décrire des expressions grâce à la méta-programmation. C'est ainsi que sont stockés les stencils : il s'agit d'une expression binaire de coefficients. Les feuilles de l'arbre sont les coefficients tandis que les nœuds sont des sous-expressions de la racine (donc des morceaux du motif du stencil). Dans le cas du code ci-dessous présentant l'agrégation de quatre coefficients, l'arbre construit est en forme de peigne (à droite ou à gauche), comme dans la figure \ref{fig:tree1_coef}.
+\begin{minted}{cpp}
+/* création d'un stencil à 4 points */
+auto st = c1+c2+c3+c4; 
+\end{minted}
+\begin{figure}[!h]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,center},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{Exemple d'arbres en peigne d'un stencil à $4$ points formé en une seule fois.}\label{fig:tree1_coef}}
+{\input{tikz3.tex}}
+\end{figure}
+Si le stencil est formé en deux temps, il est alors possible d'avoir un arbre équilibré comme dans l'exemple ci-dessous, avec la figure \ref{fig:tree2_coef}
+\begin{minted}{cpp}
+/* création d'un stencil à 4 points */
+auto st1 = c1+c2;
+auto st2 = c3+c4;
+auto st = st1+st2;
+\end{minted}
+\begin{figure}[!h]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,center},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{Exemple d'arbre équilibré d'un stencil à $4$ points formé en plusieurs temps.}\label{fig:tree2_coef}}
+{\input{tikz4.tex}}
+\end{figure}
+Notons que la forme de ces arbre n'a pas été étudiée pour l'obtention des performances, mais il est tout à fait possible que cette forme les influencent car elle influe sur l'ordre de calcul des opérations dans le stencil. 
+
+En supposant que certaines formes sont plus performantes que d'autres, il est primordial de pouvoir alors spécialiser le code en ayant en interne à la bibliothèque des fonctions optimisées pour certains types de motifs. Cela est rendu possible en \textsf{C++} grâce à la possibilité de redéfinir des classes et méthodes plusieurs fois avec des paramètres de template différents \cite{Web1}. En pratique il est même possible d'avoir des template à l'intérieur de template, ce qui permet un déclenchement retardé de la spécialisation d'une classe par rapport à ses méthodes. Cette méthode est notamment utilisée pour éviter à l'utilisateur de préciser le type dans les coefficients variables, celui-ci est propagé à la méthode lors de la construction des tableaux de coefficients, voir le second exemple de code dans la section \ref{cd:tab_io}. Cette méthode est relativement complexe, même pour le compilateur, d'où l'introduction d'une syntaxe peu compréhensible \cite{Web2}.
 
 
 \subsection{Calcul des paramètres de tuilage}
