@@ -1,6 +1,6 @@
 %% -*- eval: (flyspell-mode 1); -*-
 
-\chapter{Bibliothèque de stencils basée sur SYCL}
+\chapter{Bibliothèque de stencils basée sur \textsf{SYCL}}
 
 Au cours du stage a été développée un DSEL de stencils sous la forme d'une bibliothèque \textsf{C++} miniature. Ce DSEL essaie de reprendre les objectifs explicités dans le chapitre précédent, toutefois il s'agit plutôt d'une preuve de faisabilité ce pour quoi tous les objectifs n'ont pas été implémentés (mais leur intégration a été prévue). Ce chapitre se concentre sur la présentation de ce DSEL en ce qui concerne son utilisation, quelques détails d'implantations, ainsi que le travail restant.
 
@@ -75,8 +75,8 @@ float  fdl_in(int a,int b,
 
 Les tableaux de l'entrée et de la sortie sont déclarés sous forme de buffers, exactement comme dans le cas précédent à la différence qu'ils sont bien en deux dimensions cette fois. Une fois tous les éléments déclarés, il est donc possible de former l'opération comme dans le code ci-dessous.
 \begin{listing}[H]
-\label{lst:tab_io}
 \caption{Assemblage des informations d'entrées et sorties pour former une opération.}
+\label{lst:tab_io}
 \begin{minted}[frame=single]{cpp}
 /* assemblage des éléments de l'entrée, dans l'ordre :
  * type, buffer des éléments en entrée, buffer des 
@@ -109,6 +109,8 @@ Enfin il reste à appeler le calcul, c'est l'étape la plus simple qui n'appuie 
 }
 \end{minted}
 \end{listing}
+
+Dans tout le code présenté, la taille de la grille n'apparaît qu'une seule fois : lors de la création des buffers. Le DSEL se charge de déterminer les zones fantômes et applique automatiquement le stencil sur le plus d'éléments possibles (les tableaux d'entrées et sorties doivent avoir les mêmes dimensions). Ceci est à la fois un bénéfice pour l'utilisateur qui n'a pas besoin de répéter des informations redondantes, et à la fois un risque pour lui car il est alors susceptible d'oublier l'existence même de ces zones fantômes. 
 
 \section{Détails d'implantation}
 
@@ -156,7 +158,7 @@ auto st = st1+st2;
 \end{figure}
 Notons que la forme de ces arbre n'a pas été étudiée pour l'obtention des performances, mais il est tout à fait possible que cette forme les influencent car elle influe sur l'ordre de calcul des opérations dans le stencil. 
 
-En supposant que certaines formes sont plus performantes que d'autres, il est primordial de pouvoir alors spécialiser le code en ayant en interne à la bibliothèque des fonctions optimisées pour certains types de motifs. Cela est rendu possible en \textsf{C++} grâce à la possibilité de redéfinir des classes et méthodes plusieurs fois avec des paramètres de template différents \cite{Web1}. En pratique il est même possible d'avoir des template à l'intérieur de template, ce qui permet un déclenchement retardé de la spécialisation d'une classe par rapport à ses méthodes. Cette méthode est notamment utilisée pour éviter à l'utilisateur de préciser le type dans les coefficients variables, celui-ci est propagé à la méthode lors de la construction des tableaux de coefficients cf le second exemple de code dans la section \ref{lst:tab_io}. Cette méthode est relativement complexe, même pour le compilateur, d'où l'introduction d'une syntaxe peu compréhensible \cite{Web2}. En revanche l'utilisateur doit le préciser dans le cas des coefficients constants. Cela est redondant pour lui -- il passe l'information deux fois --, mais aussi pour le DSEL car tout le code doit alors être dupliqué, et possiblement de manière non statique ! En effet il est alors nécessaire de stocker la valeur du coefficient dans l'objet-même donc tous les autres objets (tels qu'une opération) l'utilisant doivent avoir un lien \emph{a-un} vers lui, qui est a priori dynamique. En pratique le compilateur est parfois capable de faire une telle optimisation, mais cela n'est pas garanti, et n'a pas été vérifié.
+En supposant que certaines formes sont plus performantes que d'autres, il est primordial de pouvoir alors spécialiser le code en ayant en interne à la bibliothèque des fonctions optimisées pour certains types de motifs. Cela est rendu possible en \textsf{C++} grâce à la possibilité de redéfinir des classes et méthodes plusieurs fois avec des paramètres de template différents : la spécialisation partielle \cite{Web1}. En pratique il est même possible d'avoir des template à l'intérieur de template, ce qui permet un déclenchement retardé de la spécialisation d'une classe par rapport à ses méthodes. Cette méthode est notamment utilisée pour éviter à l'utilisateur de préciser le type dans les coefficients variables, celui-ci est propagé à la méthode lors de la construction des tableaux de coefficients (cf l'extrait de code \ref{lst:tab_io}). Cette méthode est relativement complexe, même pour le compilateur, d'où l'introduction d'une syntaxe peu compréhensible \cite{Web2}. En revanche l'utilisateur doit le préciser dans le cas des coefficients constants. Cela est redondant pour lui -- il passe l'information deux fois --, mais aussi pour le DSEL car tout le code doit alors être dupliqué, et possiblement de manière non statique ! En effet il est alors nécessaire de stocker la valeur du coefficient dans l'objet-même donc tous les autres objets (tels qu'une opération) l'utilisant doivent avoir un lien \emph{a-un} vers lui, qui est a priori dynamique. En pratique le compilateur est parfois capable de faire une telle optimisation, mais cela n'est pas garanti, et n'a pas été vérifié.
 
 
 \subsection{Calcul statique des paramètres de tuilage}
@@ -168,14 +170,53 @@ L'ensemble de ce calcul est fait de manière statique, car ces paramètre sont l
 
 Une fois la zone fantôme calculée, et ainsi le nombre d'éléments à charger que va nécessiter le calcul d'une macro-tuile, il est alors possible de déterminer la taille optimale de la macro-tuile. Cette taille est déterminer de manière récursive lors de la compilation en fonction de trois paramètres configurés dans les headers, et qui sont en pratique des variables d'environnement liées au matériel : nombre de cœurs maximum dans chaque dimension pour un warp de la carte graphique, quantité maximale de mémoire locale disponible pour un warp. Il s'agit alors d'obtenir la plus grande taille possible de macro-tuile, sans dépasser la quantité de mémoire disponible. Le principe de l'algorithme est alors très simple : en commençant par la taille minimale (celle qu'occupe la zone fantôme) l'algorithme essaie d'incrémenter le nombre d'éléments dans une dimension (ou les deux si possible) jusqu'à ce que l'une des conditions suivantes soit fausse : soit le nombre de cœurs n'est plus suffisant, soit il ne reste plus assez de mémoire. Du point de vu de l'implantation en \textsf{C++} il s'agit d'une classe template qui possède un lien \emph{a-un} avec elle-même, à la différence près que celle qu'elle possède stocke une taille de macro-tuile incrémentée de un (dans une ou deux dimensions) ainsi qu'un booléen pour signifier l'arrêt ou non de la récursion. Suivant cette méthode, la macro-tuile ne s'adapte pas à la forme du stencil, mais cela est toujours possible grâce à la spécialisation partielle évoquée dans la sous-section précédente.
 
-De même que pour la zone fantôme, le tuilage est effectué de manière statique et le résultat du calcul est bien présent directement dans le binaire exécutable du programme. Les calculs statiques ne concernent d'ailleurs pas que des paramètres, mais aussi la sémantique du DSEL. En effet la présence de \textsf{static\_assert} dans le code permet d'éviter à l'utilisateur d'écrire du code fallacieux, en déclenchant une erreur lors de la compilation. Ainsi pour le tuilage, si le stencil est trop large pour la taille d'une tuile, une erreur va se déclencher. De même l'agrégation de coefficients variables avec des coefficients fixes va déclencher une erreur lors de la compilation. Cela est très utile pour le développeur car il est beaucoup plus simple de corriger un problème lorsqu'il est détecté à la compilation que lorsqu'il est détecté à l'exécution, c'est de plus un gain de temps dans le développement. 
+De même que pour la zone fantôme, le tuilage est effectué de manière statique et le résultat du calcul est bien présent directement dans le binaire exécutable du programme. Les calculs statiques ne concernent d'ailleurs pas que des paramètres, mais aussi la sémantique du DSEL. En effet la présence de \textsf{static\_assert} dans le code permet d'éviter à l'utilisateur d'écrire du code fallacieux, en déclenchant une erreur lors de la compilation. Ainsi pour le tuilage, si le stencil est trop large pour la taille d'une macro-tuile, une erreur va se déclencher. De même l'agrégation de coefficients variables avec des coefficients fixes va déclencher une erreur lors de la compilation. Cela est très utile pour le développeur car il est beaucoup plus simple de corriger un problème lorsqu'il est détecté à la compilation que lorsqu'il est détecté à l'exécution, c'est de plus un gain de temps dans le développement. 
 
 \section{\'Evolutions possibles}
 \label{sec:evol_biblio}
 
-Reprendre slides : surtout agrégation de stencils
-Overlapped tiling \cite{Art17}
-Variadic templates \cite{Art6}
+Le DSEL développé est une preuve de concept, ainsi nous savons maintenant comment développer certains aspects afin de rendre la librairie compétitive avec d'autres librairies du point de vue des performances, et peut-être même meilleure du point de vue de l'expressivité du langage -- le caractère joli. Parmi les fonctionnalités suggérées, certaines se situent au niveau de l'utilisateur et des possibilités offertes -- le \emph{front-end} -- , d'autres sont cachées et concernent les possibilités de parallélisme et d'optimisations -- le \emph{back-end}.
+
+\subsection{Améliorations du front-end}
+
+Le front-end doit offrir la possibilité à l'utilisateur de décrire la plupart des problèmes utilisant des stencils. À ce titre il est nécessaire de rajouter la possibilité de spécialiser la fonction d'application d'un coefficient sur un élément, représentée par le symbole $\otimes$ défini à la section \ref{sec:obj_sem}. En effet cela permettrait non seulement de gérer des types plus complexes que les entiers ou les flottants (par exemple des matrices ou des complexes), mais aussi de traiter des problèmes non linéaires (par exemple la mise au carré des éléments d'une grille, se faisant par un stencil à un seul point donc). Le rajout d'une telle fonction est très simple, il suffit de la mettre en paramètre du template du coefficient voulu (à la suite des indices de décalage). De même il serait envisageable de pouvoir modifier l'opérateur de réduction $\oplus$, mais ce cas est moins utile et moins intuitif de manière sémantique. En effet le plus simple serait de la rajouter en paramètre du template contenant les tableaux d'entrées du stencil et fonctions associées, mais cet objet deviendrait alors un objet \og fourre-tout \fg~ sans véritable sens. 
+
+Par ailleurs les calculs de stencils sont souvent chaînés les uns aux autres : le tableau de sortie de l'application d'un stencil est le tableau d'entrée du stencil suivant. Ces traitements successifs ne devraient pas obliger l'utilisateur à redéfinir des nouveaux tableaux d'entrées et sorties pour chaque stencil. Il serait plus simple de pouvoir créer une unique opération pour toute la chaîne de stencils, comme dans le code \ref{lst:agreg1_stencil} suivant. Du point de vue l'implantation, il est alors nécessaire de prévoir des communications de zones fantômes entre les warp entre l'application de chaque stencil -- si le tuilage est utilisé --, ce qui est une difficulté technique relativement conséquente.
+
+\begin{listing}[H]
+\caption{Exemple de syntaxe pour le chaînage de plusieurs stencils sur une même entrée.}
+\label{lst:agreg1_stencil}
+\begin{minted}[frame=single]{cpp}
+/* assemblage des éléments de l'entrée, dans l'ordre */
+input_var2D<float, &ioABuffer, &ioBBuffer, &fdl_in, &fac> work_in;
+/* assemblage des éléments de sortie */
+output_2D<float, &ioBuffer, &fdl_out> work_out;
+/* création de l'opération */
+auto op_work = work_out << st3 << st2 << st1 << work_in;
+\end{minted}
+\end{listing}
+
+Un autre type d'agrégation est également envisagé, il s'agit d'appliquer des stencils différents (vers des sorties différents donc) sur une même grille d'entrée. Le gain en performance est alors potentiellement élevé car le taux de réutilisation des données est ainsi augmenté : le tableau d'entrée est chargé une seule fois et sert à plusieurs stencils en même temps. Une syntaxe possible est présentée dans le code \ref{lst:agreg2_stencil}, il s'agit alors de placer plusieurs objets d'éléments de sorties les uns à la suite des autres, entrelacés avec les stencils concernés. 
+
+\begin{listing}[H]
+\caption{Exemple de syntaxe pour l'application sur une même entrée de plusieurs stencils différents vers leurs sorties respectives.}
+\label{lst:agreg2_stencil}
+\begin{minted}[frame=single]{cpp}
+/* création de l'opération */
+auto op_work = work_out3 << st3 << work_out2 << st2 << work_out1 << st1 << work_in;
+\end{minted}
+\end{listing}
+
+Une telle sémantique nécessite la vérification poussée des tableaux en jeux, afin de détecter lors de la compilation que l'utilisateur n'a pas utilisé plusieurs fois le même tableau de sortie, ou a utilisé un même tableau en sortie et en entrée. Comme le nombre de stencils que l'utilisateur peut vouloir agréger est inconnu à l'avance, il n'est pas possible d'utiliser la technique de spécialisation partielle directement (car il faudrait alors écrire dans le code du DSEL tous les cas d'erreurs possibles, ce qui est du coup impossible). Il convient alors d'utiliser les \emph{variadic template} introduit au \textsf{C++11} \cite{Art6}, qui permettent de créer des listes statiques lors de la compilation, et par exemple d'en compter les éléments, mais aussi de pouvoir les différencier. En pratique cette technique est difficile à mettre en œuvre et nécessite beaucoup de calculs tandis que la limite de pile de récursion des template lors de la compilation se situe autour de $900$ appels. Toutefois il est peu probable que l'utilisateur utilise ne serait-ce que $10$ sorties différentes, ce qui même avec un algorithme naïf quadratique (comparaison de la liste avec elle-même) ne provoquerait que $100$ appels récursifs.
+
+
+\subsection{Améliorations du back-end}
+
+Dans le cas du calcul classique de Jacobi en deux dimensions (qui peut servir notamment à flouter des images), le même stencil est appliqué un certains nombre de fois d'affilée. Or puisque les modifications ne sont pas faites en place, cela nécessite beaucoup de communications, qu'il est possible de diminuer en effectuant en contrepartie quelques calculs supplémentaires redondants (et possiblement en utilisant un peu plus de mémoire). Selon les coûts de communications, les coûts de calculs et la mémoire disponible, cette technique peut fournir un gain substantiel de performances, il s'agit de l'\emph{overlapped tiling} ou tuilage chevauchant. Cette technique est assez développée, et est même encore adaptée à la hiérarchie actuelle des ordinateurs \cite{Art17}. Plus concrètement, ce principe est simplement une extension du tuilage tel que représenté dans la figure \ref{fig:stencil_mtile} au chapitre précédent. Les macro-tuiles se chevauchent puisqu'elles nécessitent une zone fantôme qui se trouve chez leurs voisines. Cette zone est prévue pour une seule application dans le cas de la figure \ref{fig:stencil_mtile}, mais il peut très bien il y en avoir plusieurs, concentriques, dont les éléments calculés sur les bords seront redondants. 
+
+--> mettre une figure ...
+
+
 Forme des blocs : Diamond Tiling stencil \cite{Art16}
 
 

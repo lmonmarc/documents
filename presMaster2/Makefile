@@ -11,7 +11,7 @@ all: $(RES1) $(RES2)
 
 %/main-rep.pdf: %/*.tex
 	@echo "Compiling $@ with pdflatex -shell-escape ..."
-	@echo "pdflatex used of unicode characters"
+	@echo "pdflatex used for unicode characters"
 	@cd `dirname  $<` ;\
 	pdflatex -shell-escape main-rep.tex > /dev/null ;\
 	pdflatex -shell-escape main-rep.tex > /dev/null ;\
