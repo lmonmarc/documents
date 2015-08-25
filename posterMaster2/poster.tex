@@ -1,0 +1,41 @@
+\documentclass[12pt]{article}
+
+\usepackage{eso-pic}
+\usepackage{calc}
+\usepackage{graphicx}
+
+\usepackage{lipsum}
+
+%% put prend les longueurs sans unités d'où ce petit code :
+\makeatletter
+\newcommand*{\getlength}[1]{\strip@pt#1}
+% Or rounded back to `cm` (there will be some rounding errors!)
+%\newcommand*{\getlength}[1]{\strip@pt\dimexpr0.035146\dimexpr#1\relax\relax}
+
+\makeatother
+
+
+\AddToShipoutPictureBG*{
+%% background
+  \AtPageUpperLeft{\raisebox{-\height}{\includegraphics[width=\paperwidth,height=\paperheight]{Modele_Poster_A4.eps}}}
+
+%% logo écoles à gauche
+  \AtPageUpperLeft{\put(10,-10){\raisebox{-\height}{\includegraphics[width=5cm]{bx-inp-vecto.eps}}}}
+  \AtPageLowerLeft{\put(10,10){\includegraphics[width=5cm]{em-bxinp.eps}}}
+
+%% vos logos à droite (exemple avec ceux de l'école)
+\newlength{\mylength}
+\setlength{\mylength}{\paperwidth - 5cm - 10pt}
+%%\def\unitlength{}
+  \AtPageUpperLeft{{\put(\getlength{\mylength},-10){\raisebox{-\height}{\includegraphics[width=5cm]{bx-inp-vecto.eps}}}}}
+  \AtPageLowerLeft{\put(\getlength{\mylength},10){\includegraphics[width=5cm]{em-bxinp.eps}}}
+
+}
+
+\pagestyle{empty}
+\begin{document}
+
+\lipsum[1-2]
+
+
+\end{document}
