@@ -21,6 +21,10 @@ Ces deux nombres ont été comparé entre plusieurs codes d'un même problème d
 \item code \textsf{OpenCL} avec parallélisation par tuilage.
 \end{enumerate}
 
+Les deux versions du DSEL ne se déclinent pas en parallélisation avec tuilage ou naïve puisque celle-ci est simplement choisie par l'appel d'une méthode ou l'autre, dont les noms ne différent que de cinq caractères (qui ont été comptabilisés). Par ailleurs pour comptabiliser les lignes de codes et caractères, toutes les lignes vides n'ont pas été comptabilisées, de même que les commentaires. De plus les conventions de codage (pour les retours à la ligne et la disposition des arguments) sont les mêmes pour les $8$ codes. Enfin aucune entrée/sortie standard (en dehors des erreurs) n'est intégrée dans le décompte des deux métriques ; les seules erreurs reportées se trouvent dans le code d'\textsf{OpenCL}, car c'est à la charge de l'utilisateur de les traiter contrairement aux autres codes (\textsf{OpenMP} n'en n'a pas besoin dans ce cas, et celles de \textsf{triSYCL} sont gérées en interne de même que le DSEL qui s'appuie sur \textsf{triSYCL}).
+
+Les résultats sont reproduits dans le tableau \ref{tab:eval_qual} où l'on peut observer que le DSEL (avec coefficients constants) est le troisième code le plus court avec $42$ lignes, tandis que le plus court (code de base) en comporte $31$. Le DSEL avec coefficients constants se classe cinquième avec $46$ lignes. En ce qui concerne les codes avec tuilage, ils ont deux fois (\textsf{OpenMP}) à cinq fois (\textsf{OpenCL}) plus long que le code de base. Le classement est quasiment identique selon le nombre de caractères (à une inversion près, ne concernant pas le DSEL).
+
 \begin{table}
 \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,center},capbesidewidth=4cm}}]{table}[\FBwidth]
 {
@@ -53,17 +57,25 @@ OpenCL tuilage & $177$ & $6266$ \\
 }
 \end{table}
 
+En résumé, l'écriture du code grâce au DSEL est du même ordre de grandeur que l'écriture des codes parallélisés naïfs (à quelques lignes près) lors qu'il propose l'optimisation de tuilage. Les autres codes proposant le tuilage étant quant à eux deux à cinq fois plus longs que le code de base, le DSEL permet ainsi une amélioration significative des performances (grâce au tuilage) sans augmenter substantiellement la charge de développement (estimée en LOCs).
+
 
 \section{Performances quantitatives sur machines dédiées}
+
+Les performances quantitatives s'appuient sur deux métriques : le temps d'exécution et les compteurs \emph{hardwares}. Tandis que la rapidité d'exécution est l'objectif principal de la librairie, les compteurs permettent de comptabiliser indirectement la réutilisation des données, qui plus elle est grande plus elle favorise la rapidité. Le protocole de tests est présenté en premier, avant de préciser plus en détail les résultats de ces mesures.
 
 \subsection{Description du matériel et des cas de tests}
 \label{sec:desc_mat_tests}
 
-
-
-+ Vérification des valeurs numériques
-
 + Parler des tuiles au sens vecteur d'éléments
+
++ Vérification des valeurs numériques 
+
+\subsubsection*{Implantations testées}
+
+
+\subsubsection*{Machines de tests}
+
 
 \subsection{Mesures de temps}
 
