@@ -110,7 +110,7 @@ Enfin il reste à appeler le calcul, c'est l'étape la plus simple qui n'appuie 
 \end{minted}
 \end{listing}
 
-Dans tout le code présenté, la taille de la grille n'apparaît qu'une seule fois : lors de la création des buffers. Le DSEL se charge de déterminer les zones fantômes et applique automatiquement le stencil sur le plus d'éléments possibles (les tableaux d'entrées et sorties doivent avoir les mêmes dimensions). Ceci est à la fois un bénéfice pour l'utilisateur qui n'a pas besoin de répéter des informations redondantes, et à la fois un risque pour lui car il est alors susceptible d'oublier l'existence même de ces zones fantômes. 
+Dans tout le code présenté, la taille de la grille n'apparaît qu'une seule fois : lors de la création des buffers. Le DSEL se charge de déterminer les zones fantômes et applique automatiquement le stencil sur le plus d'éléments possibles (les tableaux d'entrées et sorties doivent avoir les mêmes dimensions). Ceci est un bénéfice pour l'utilisateur qui n'a pas besoin de répéter des informations redondantes, mais aussi un risque pour lui car il est alors susceptible d'oublier l'existence même de ces zones fantômes. 
 
 \section{Détails d'implantation}
 
