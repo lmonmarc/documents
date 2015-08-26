@@ -2,13 +2,56 @@
 
 \chapter{\'Evaluation de la bibliothèque}
 
+Le DSEL doit être évalué dans plusieurs domaines : à la fois en matière d'expressivité du langage et à la fois du point de vue des performances matérielles (la rapidité d'exécution). Ces deux évaluations ont été difficiles à réaliser car d'une part l'expressivité est difficilement quantifiable, et d'autre part car le DSEL s'appuie sur la bibliothèque \textsf{triSYCL} qui est seulement un prototype -- une preuve de concept également.
+
 
 \section{\'Evaluation qualitative}
 
-Comparaisons d'expressivités (nombre de lignes, nombres de symboles, typage à la compilation), factorisation de code
-Reprendre slides : différents cas de tests
+La qualité du DSEL peut se juger à la facilité d'écriture de code l'utilisant. Globalement il faudrait alors évaluer à quel point la librairie permet d'abstraire le problème qu'elle est censée résoudre (ici la parallélisation de stencils). Plus particulièrement il s'agit de quantifier notamment du pseudo-typage (erreurs sémantiques statiques), du nombre de mots-clés (classes, méthodes), du nombre de symboles, et enfin du nombre de lignes de codes (LOC). Pour des raisons de simplicité seul le nombre de ligne de codes ainsi que le nombre de caractères ont été pris en compte. 
 
-Programme test fluide pour jeux \cite{Art15} ?
+Ces deux nombres ont été comparé entre plusieurs codes d'un même problème de Jacobi en deux dimensions avec un stencil à cinq points. Les différentes versions du code sont :
+\begin{enumerate}
+\item code de base sans parallélisation ;
+\item code \textsf{OpenMP} avec parallélisation naïve ;
+\item code \textsf{OpenMP} avec parallélisation par tuilage ;
+\item code \textsf{triSYCL} avec parallélisation naïve ;
+\item code \textsf{triSYCL} avec parallélisation par tuilage ;
+\item code \textsf{DSEL} avec parallélisation et coefficients variables ;
+\item code \textsf{DSEL} avec parallélisation et coefficients constants ;
+\item code \textsf{OpenCL} avec parallélisation par tuilage.
+\end{enumerate}
+
+\begin{table}
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,center},capbesidewidth=4cm}}]{table}[\FBwidth]
+{
+\caption{Évaluation du nombre de lignes de codes et de caractères pour différentes implantations d'un problème Jacobi2D.}
+\label{tab:eval_qual}
+}
+{
+\begin{tabular}{||c||c|c||}
+\hline
+implantation & LOCs & caractères \\
+\hline
+\hline
+base & $31$ & $899$ \\
+\hline
+OpenMP naïf & $32$ & $924$ \\
+\hline
+OpenMP tuilage & $87$ & $3115$ \\
+\hline
+triSYCL naïf & $43$ & $1676$ \\
+\hline
+triSYCL tuilage & $74$ & $3647$ \\
+\hline
+DSEL variable & $46$ & $1919$ \\
+\hline
+DSEL constant & $42$ & $1624$ \\
+\hline
+OpenCL tuilage & $177$ & $6266$ \\
+\hline
+\end{tabular}
+}
+\end{table}
 
 
 \section{Performances quantitatives sur machines dédiées}
