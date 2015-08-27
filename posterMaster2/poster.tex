@@ -1,41 +1,85 @@
-\documentclass[12pt]{article}
-
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
 \usepackage{eso-pic}
 \usepackage{calc}
 \usepackage{graphicx}
+\usepackage[tikz]{bclogo}
 
-\usepackage{lipsum}
+\usepackage[a4paper,right=2cm]{geometry}
+
+%Sans serif font
+\renewcommand{\familydefault}{\sfdefault}
+
+%Header parameters
+\newcommand{\subject}{Développement d'un DSEL pour optimiser les calculs sur les stencils}
+\newcommand{\intern}{Alexandre Honorat (PRCD)}
+\newcommand{\tutor}{Olivier Aumage et Denis Barthou}
+\newcommand{\companyname}{INRIA Bordeaux -- équipe Storm}
 
 %% put prend les longueurs sans unités d'où ce petit code :
 \makeatletter
 \newcommand*{\getlength}[1]{\strip@pt#1}
 % Or rounded back to `cm` (there will be some rounding errors!)
 %\newcommand*{\getlength}[1]{\strip@pt\dimexpr0.035146\dimexpr#1\relax\relax}
-
 \makeatother
-
 
 \AddToShipoutPictureBG*{
 %% background
   \AtPageUpperLeft{\raisebox{-\height}{\includegraphics[width=\paperwidth,height=\paperheight]{Modele_Poster_A4.eps}}}
 
 %% logo écoles à gauche
-  \AtPageUpperLeft{\put(10,-10){\raisebox{-\height}{\includegraphics[width=5cm]{bx-inp-vecto.eps}}}}
-  \AtPageLowerLeft{\put(10,10){\includegraphics[width=5cm]{em-bxinp.eps}}}
+  \AtPageUpperLeft{\put(30,-30){\raisebox{-\height}{\includegraphics[width=5cm]{bx-inp-vecto.eps}}}}
+  \AtPageLowerLeft{\put(30,30){\includegraphics[width=5cm]{em-bxinp.eps}}}
 
 %% vos logos à droite (exemple avec ceux de l'école)
-\newlength{\mylength}
-\setlength{\mylength}{\paperwidth - 5cm - 10pt}
+\newlength{\mylengthLogo}
+\setlength{\mylengthLogo}{\paperwidth - 6cm - 30pt}
+\newlength{\mylengthImg}
+\setlength{\mylengthImg}{\paperwidth - 3cm - 30pt}
 %%\def\unitlength{}
-  \AtPageUpperLeft{{\put(\getlength{\mylength},-10){\raisebox{-\height}{\includegraphics[width=5cm]{bx-inp-vecto.eps}}}}}
-  \AtPageLowerLeft{\put(\getlength{\mylength},10){\includegraphics[width=5cm]{em-bxinp.eps}}}
+  \AtPageUpperLeft{{\put(\getlength{\mylengthImg},-30){\raisebox{-\height}{\includegraphics[width=3cm]{moi.jpg}}}}}
+  \AtPageLowerLeft{\put(\getlength{\mylengthLogo},45){\includegraphics[width=6cm]{INRIA_sc.png}}}
 
+%% minipage de titre
+\newlength{\mylengthTitre}
+\setlength{\mylengthTitre}{0.25\paperwidth + 0.8cm}
+  \AtPageUpperLeft{{\put(\getlength{\mylengthTitre},-60){\raisebox{-\height}{
+	\begin{minipage}[b]{0.5\paperwidth}
+		\centering
+		{\LARGE \textbf{\subject}}
+                \end{minipage}
+        }
+    }}}
 }
 
+
 \pagestyle{empty}
+
+%Only here
+\setlength{\fboxsep}{10pt}
+
 \begin{document}
 
-\lipsum[1-2]
+\begin{center}
 
+\vspace*{0.5cm}
+
+  {\large Stagiaire : \intern}\\
+  {\large Encadrants : \tutor}\\
+  {\large Entreprise : \companyname}
+
+\vspace{1cm}
+
+\begin{bclogo}[couleur=black!10,couleurBord=black!50,arrondi=0.1,logo=\hspace{17pt},barre=none]{Titre de la boite}
+Contenu de la boite azdijoioaij azidjaoizjdao azdijaozijdoaj azdoijaozijda azodijaozjda azdoijazdoa azodijaozidjaz azdijijazdoi
+
+coucou
+
+azdlpazl
+\end{bclogo}
+
+\end{center}
 
 \end{document}
