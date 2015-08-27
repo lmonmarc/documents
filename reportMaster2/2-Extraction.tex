@@ -123,6 +123,7 @@ En résumé l'application d'un stencil sur une grille nécessite l'enregistremen
 Les caractères joli et sûr du DSEL sont nécessairement dépendant du langage choisi. En ce qui concerne l'élégance, il s'agit d'utiliser le moins de symboles et fonctions possibles, et de cacher tous les paramètres inutiles. Pour la sûreté le but est de détecter certains types d'erreurs comme l'utilisation du même tableau en entrée et en sortie (en supposant que le calcul en place n'a pas lieu d'être) et l'usage d'indices de décalage en dehors de la grille.
 
 \subsection{Objectifs de performances}
+\label{sec:obj_perf}
 
 Les performances peuvent s'obtenir grâce à l'adaptation du code tant par rapport au matériel que par rapport aux algorithmes de calculs utilisés. Deux voies principales doivent être explorées : la réutilisation maximale des données dans le cache (qui induit le principe de \emph{tuilage}), le calcul du plus grand nombre de paramètres possibles lors de la compilation (les variables en jeu étant alors \emph{statiques}).
 
