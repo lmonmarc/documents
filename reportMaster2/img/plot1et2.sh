@@ -24,7 +24,7 @@ set key on left
 set output "graph1.pdf" 
 set ylabel "Temps d'exécution ms"
 set title "Temps d'exécution normalisé de la version OpenMP avec tuilage en fonction de la taille des macro-tuiles (M) et des tuiles (T)"
-plot "graph1et2.dat" u ((\$2+\$12)/(2.0**\$22)):xtic(1)  lc rgb 'yellow' ti col(2), '' u ((\$3+\$13)/(2.0**\$22))  lc rgb 'blue' ti col(3), '' u ((\$4+\$14)/(2.0**\$22))  lc rgb 'red' ti col(4), '' u ((\$5+\$15)/(2.0**\$22))  lc rgb 'green' ti col(5)
+plot "graph1et2.dat" u ((\$4+\$14)/(2.0**\$22)):xtic(1)  lc rgb 'red' ti col(4), '' u ((\$3+\$13)/(2.0**\$22))  lc rgb 'blue' ti col(3), '' u ((\$5+\$15)/(2.0**\$22))  lc rgb 'green' ti col(5), '' u ((\$2+\$12)/(2.0**\$22))  lc rgb 'yellow' ti col(2)
 
 set key on right
 set output "graph2.pdf" 
