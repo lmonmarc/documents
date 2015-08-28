@@ -164,10 +164,31 @@ Mistral & $128$ ($252.52$) & $128$ ($225.84$) & $25$ MB & $256$ KB \\
 \end{table} 
 
 
-\subsection{Mesures de temps}
+\subsection{Mesures de temps et compteurs}
 
 (Pour hiérarchisation, \cite{Ths3,Ths4})
 
+\begin{figure}[!h]
+  \caption{Comparaison des performances en temps suivant la taille des tuiles et des macro-tuiles.}
+  \label{graph:comp_tuile_time}
+  \includegraphics[width=\textwidth]{graph1.pdf}
+\end{figure}
 
-\subsection{Mesures de compteurs}
+\begin{figure}[!h]
+  \caption{Comparaison des performances en compteurs matériels suivant la taille des tuiles et des macro-tuiles.}
+  \label{graph:comp_tuile_cmiss}
+  \includegraphics[width=\textwidth]{graph2.pdf}
+\end{figure}
+
+\begin{figure}[!h]
+  \caption{Comparaison des performances suivant l'implantation sur un seul banc NUMA.}
+  \label{graph:comp_temps_mistral10core}
+  \includegraphics[width=\textwidth]{graph3.pdf}
+\end{figure}
+
+\begin{figure}[!h]
+  \caption{Comparaison des performances suivant l'implantation sur deux bancs NUMA.}
+  \label{graph:comp_temps_mistral20core}
+  \includegraphics[width=\textwidth]{graph4.pdf}
+\end{figure}
 
