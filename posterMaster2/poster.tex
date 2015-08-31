@@ -1,12 +1,23 @@
-\documentclass[a4paper]{article}
+%% -*- eval: (flyspell-mode 1); -*-
+
+\documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
 \usepackage{eso-pic}
 \usepackage{calc}
-\usepackage{graphicx}
-\usepackage[tikz]{bclogo}
 
+\usepackage{graphicx}
+\graphicspath{{./img/}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning,fit}
+
+\usepackage{color}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage[tikz]{bclogo}
 \usepackage[a4paper,right=2cm]{geometry}
 
 %Sans serif font
@@ -57,25 +68,83 @@
 
 \pagestyle{empty}
 
-%Only here
-\setlength{\fboxsep}{10pt}
-
 \begin{document}
 
 \begin{center}
 
-\vspace*{0.5cm}
+\vspace{0.2cm}
 
   {\large Stagiaire : \intern}\\
   {\large Encadrants : \tutor}\\
   {\large Entreprise : \companyname}
 
-\vspace{1cm}
+\vspace{0.25cm}
 
 \begin{bclogo}[couleur=black!10,couleurBord=black!50,arrondi=0.1,logo=\hspace{17pt},barre=none]{Objectifs du stage}
-Le stage effectué avait pour but la conception d'un \emph{DSEL} (Domain Specific Embedded Language) destiné à faciliter l'écriture et la parallélisation de codes à base de stencils. Deux aspects ont donc été étudiés : la sémantique du DSEL (quelles informations il doit être capable de comprendre) et les performances (obtenues par la parallélisation sur carte graphique par exemple).
+Le stage effectué avait pour but la conception d'un \emph{DSEL} (Domain Specific Embedded Language) destiné à faciliter l'écriture et la parallélisation de codes à base de stencils. Deux aspects ont donc été étudiés : la sémantique du DSEL (quelles informations il doit être capable de comprendre) et les performances (obtenues par la parallélisation sur carte graphique notamment).
 
-Voici l'équation généal d'un stencil en deux dimensions et pour quatre points 
+Concrètement un stencil est le calcul d'un élément d'un tableau grâce à ses voisins, comme illustré ci-dessous par une représentation graphique et la formule mathématique associée. Le cas le plus simple serait par exemple : $A[i] = 1.0 \times A[i+1]$.
+
+\begin{minipage}[c]{0.6\textwidth}
+\begin{equation*}
+\begin{aligned}
+g(i,j,B) = & f(i, j, -1, \quad 0, C) \otimes g(i-1, j+0, A) \, \oplus \\
+           & f(i, j, \quad 1, \quad 0, C) \otimes g(i+1,j+0, A) \, \oplus \\
+           & f(i, j, \quad 0, -1, C) \otimes g(i+0,j-1, A) \, \oplus \\ 
+           & f(i, j, \quad 0, \quad 1, C) \otimes g(i+0,j+1, A)
+\end{aligned}
+\end{equation*}
+\end{minipage}%
+\begin{minipage}[c]{.3\textwidth}
+\input{tikz1.tex}
+\end{minipage}%
+
+Équation générale du stencil à $4$ points en deux dimensions, A est le tableau d'entrée, B celui de sortie, C celui des coefficients. $f$ et $g$ sont des fonctions d'accès aux tableaux. $i,j$ est l'indice courant, $-1,0$ l'indice relatif d'un voisin. Les éléments en rouge sur l'image de droite sont \emph{fantômes} : le stencil ne peut pas leur être appliqué mais ils sont utilisés pour les mises à jour des éléments internes.
+
+\end{bclogo}
+
+\vspace{0.15cm}
+
+\begin{bclogo}[couleur=black!10,couleurBord=black!50,arrondi=0.1,logo=\hspace{17pt},barre=none]{Réalisation : implantation en C++14 et reposant sur triSYCL}
+\textsf{SYCL} est une interface de parallélisation en cours de normalisation, elle permettra de gérer simplement tout type de processeur et s'occupera automatiquement des chargements mémoires. \textsf{triSYCL} en est le prototype développé par Ronan Keryell, et utilisé dans le DSEL. Ci-dessous un exemple de code utilisant le DSEL pour le stencil ci-dessus, et le processus général à appliquer (en bleu).
+
+\begin{minipage}[c]{0.55\textwidth}
+\begin{minted}[frame=single]{cpp}
+coef_fxd2D<0, -1> c1 {1.0};
+coef_fxd2D<1, 0> c2 {1.0};
+coef_fxd2D<0, 1> c3 {1.0};
+coef_fxd2D<-1, 0> c4 {1.0};
+auto st = c2+c3+c4+c5;
+input_fxd2D<float, &ioABuffer, &fdl_in> 
+  work_in;
+output_2D<float, &ioBuffer, &fdl_out> 
+  work_out;
+auto op_work = work_out << st << work_in;
+\end{minted}
+\end{minipage}%
+\begin{minipage}[c]{0.45\textwidth}
+\textcolor{blue}{
+\begin{enumerate}[itemsep=-1mm]
+\item $\Rightarrow$ initialiser les coefficients ;
+\item $\Rightarrow$ les assembler pour former un stencil ;
+\item déclarer et initialiser les tableaux avec \textsf{SYCL} qui gère les transferts mémoire ;
+\item $\Rightarrow$ regrouper les informations nécessaires au calcul (stencil, tableaux et fonctions) au sein d'objets \emph{input} et \emph{output};
+\item $\Rightarrow$ créer l'\emph{operation} à partir du stencil, \emph{input} et \emph{output} ;
+\item déclarer une queue de calcul avec \textsf{SYCL} ;
+\item appeler la méthode de lancement des calcul sur l'objet \emph{operation}.
+\end{enumerate}
+}
+\end{minipage}
+
+Le DSEL est codé en \textsf{C++14} afin de bénéficier des \textsf{lambdas fonctions}, du type \textsf{auto}. Il s'appuie sur les \emph{templates} et la spécialisation partielle pour sélectionner les implantations les plus adaptées aux machines (par exemple le \emph{tiling} pour les GPU) et pour calculer des paramètres à la compilation.
+
+\end{bclogo}
+
+\vspace{0.15cm}
+
+\begin{bclogo}[couleur=black!10,couleurBord=black!50,arrondi=0.1,logo=\hspace{17pt},barre=none]{Conclusion}
+Alors qu'un code écrit en \textsf{OpenCL} pour le stencil à $4$ points présenté nécessite $177$ lignes, le DSEL n'en demande que $42$. Les performances sémantiques sont donc au rendez-vous, il reste toutefois beaucoup d'améliorations possibles, notamment pour les techniques de parallélisation utilisées.
+
 \end{bclogo}
 
 \end{center}

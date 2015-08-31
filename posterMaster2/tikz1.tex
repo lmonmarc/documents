@@ -1,4 +1,4 @@
-\begin{tikzpicture}[scale=0.8]
+\begin{tikzpicture}[scale=0.6]
 \tikzstyle{place}=[circle,thick,draw=blue!75,fill=blue!20,minimum size=4mm]
 
 \node[place] (p1) at (0,0) {};
@@ -12,14 +12,6 @@
 \node[place] () at (1,-1) {};
 \node[place] () at (1,1) {};
 
-\foreach \x in {-2,...,2}
-{
-  \node[place] () at (\x,2) {};
-  \node[place] () at (\x,-2) {};
-  \node[place] () at (2,\x) {};
-  \node[place] () at (-2,\x) {};
-}
-
 \draw[->,thick] (p2) to (p1);
 \draw[->,thick] (p3) to (p1);
 \draw[->,thick] (p4) to (p1);
@@ -27,12 +19,12 @@
 
 \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=4mm]
 
-\foreach \x in {-3,...,3}
+\foreach \x in {-2,...,2}
 {
-  \node[place] () at (\x,3) {};
-  \node[place] () at (\x,-3) {};
-  \node[place] () at (3,\x) {};
-  \node[place] () at (-3,\x) {};
+  \node[place] () at (\x,2) {};
+  \node[place] () at (\x,-2) {};
+  \node[place] () at (2,\x) {};
+  \node[place] () at (-2,\x) {};
 }
 
 
